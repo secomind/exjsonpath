@@ -24,21 +24,21 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello.world"
 
-    assert ExJsonPath.eval(map, path) == ["test"]
+    assert ExJsonPath.eval(map, path) == {:ok, ["test"]}
   end
 
   test "eval $.data.values[1]" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values[1]"
 
-    assert ExJsonPath.eval(map, path) == [-1]
+    assert ExJsonPath.eval(map, path) == {:ok, [-1]}
   end
 
   test "eval $.data.values[1].value" do
     map = %{"data" => %{"values" => [%{"value" => 0.1}, %{"value" => 0.2}, %{"value" => 0.3}]}}
     path = "$.data.values[1].value"
 
-    assert ExJsonPath.eval(map, path) == [0.2]
+    assert ExJsonPath.eval(map, path) == {:ok, [0.2]}
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters an array} do
@@ -56,7 +56,7 @@ defmodule ExJsonPathTest do
 
     path = ~s{$.data[0].values[?(@.name == "test")].value}
 
-    assert ExJsonPath.eval(map, path) == [0.3]
+    assert ExJsonPath.eval(map, path) == {:ok, [0.3]}
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters a map} do
@@ -74,7 +74,7 @@ defmodule ExJsonPathTest do
 
     path = ~s{$.data[0].values[?(@.name == "test")].value}
 
-    assert ExJsonPath.eval(map, path) == [0.3]
+    assert ExJsonPath.eval(map, path) == {:ok, [0.3]}
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters a map and returns 2 items} do
@@ -92,7 +92,7 @@ defmodule ExJsonPathTest do
 
     path = ~s{$.data[0].values[?(@.name == "test")].value}
 
-    assert ExJsonPath.eval(map, path) == [0.1, 0.3]
+    assert ExJsonPath.eval(map, path) == {:ok, [0.1, 0.3]}
   end
 
   # This is not described [here](https://goessner.net/articles/JsonPath/)
@@ -101,7 +101,7 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => "test"}}
     path = "hello"
 
-    assert ExJsonPath.eval(map, path) == [%{"world" => "test"}]
+    assert ExJsonPath.eval(map, path) == {:ok, [%{"world" => "test"}]}
   end
 
   # This is not described [here](https://goessner.net/articles/JsonPath/)
@@ -110,6 +110,6 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => "test"}}
     path = "hello.world"
 
-    assert ExJsonPath.eval(map, path) == ["test"]
+    assert ExJsonPath.eval(map, path) == {:ok, ["test"]}
   end
 end

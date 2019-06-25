@@ -28,10 +28,10 @@ defmodule ExJsonPath do
 
     case result do
       array_result when is_list(array_result) ->
-        array_result
+        {:ok, array_result}
 
       item ->
-        [item]
+        {:ok, [item]}
     end
   end
 
