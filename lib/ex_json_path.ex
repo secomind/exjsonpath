@@ -24,7 +24,15 @@ defmodule ExJsonPath do
   end
 
   def eval(map, compiled_path) when is_map(map) and is_list(compiled_path) do
-    recurse(map, compiled_path)
+    result = recurse(map, compiled_path)
+
+    case result do
+      array_result when is_list(array_result) ->
+        array_result
+
+      item ->
+        [item]
+    end
   end
 
   def compile(path) when is_binary(path) do
