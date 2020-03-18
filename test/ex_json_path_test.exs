@@ -94,4 +94,22 @@ defmodule ExJsonPathTest do
 
     assert ExJsonPath.eval(map, path) == [0.1, 0.3]
   end
+
+  # This is not described [here](https://goessner.net/articles/JsonPath/)
+  # but his implementation supports it, and nearly every other implementation.
+  test "hello" do
+    map = %{"hello" => %{"world" => "test"}}
+    path = "hello"
+
+    assert ExJsonPath.eval(map, path) == %{"world" => "test"}
+  end
+
+  # This is not described [here](https://goessner.net/articles/JsonPath/)
+  # but his implementation supports it, and nearly every other implementation.
+  test "hello.world" do
+    map = %{"hello" => %{"world" => "test"}}
+    path = "hello.world"
+
+    assert ExJsonPath.eval(map, path) == "test"
+  end
 end
