@@ -24,21 +24,21 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello.world"
 
-    assert ExJsonPath.eval(map, path) == ["test"]
+    assert ExJsonPath.eval(map, path) == "test"
   end
 
   test "eval $.data.values[1]" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values[1]"
 
-    assert ExJsonPath.eval(map, path) == [-1]
+    assert ExJsonPath.eval(map, path) == -1
   end
 
   test "eval $.data.values[1].value" do
     map = %{"data" => %{"values" => [%{"value" => 0.1}, %{"value" => 0.2}, %{"value" => 0.3}]}}
     path = "$.data.values[1].value"
 
-    assert ExJsonPath.eval(map, path) == [0.2]
+    assert ExJsonPath.eval(map, path) == 0.2
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters an array} do
