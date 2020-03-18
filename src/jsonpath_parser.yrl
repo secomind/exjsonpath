@@ -21,6 +21,7 @@ Terminals '.' '$' '[' ']' '@' '?' '(' ')' '==' '!=' identifier integer string.
 Rootsymbol jsonpath.
 
 jsonpath -> identifier : [{access, extract_token('$1')}].
+jsonpath -> identifier path : [{access, extract_token('$1')} | '$2'].
 jsonpath -> '$' path : '$2'.
 
 path -> child : '$1'.
