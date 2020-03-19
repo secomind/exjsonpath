@@ -30,7 +30,7 @@ defmodule ExJsonPathTest do
   # goessner's implementation (and others) return [["test"]] here.
   # Few other implementations will return ["test"].
   # Here we behave like goessner's one.
-  test "eval $.hello.world with single value array" do
+  test "eval $.hello.world returns a single value array" do
     map = %{"hello" => %{"world" => ["test"]}}
     path = "$.hello.world"
 
@@ -51,7 +51,7 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(map, path) == {:ok, [0.2]}
   end
 
-  test ~s{eval $.data[0].values[?(@.name == "test")].value filters an array} do
+  test ~s{eval $.data[0].values[?(@.name == "test")].value filters an array of objects} do
     map = %{
       "data" => [
         %{
@@ -89,7 +89,7 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(map, path) == {:ok, [0.0, 0.3]}
   end
 
-  test ~s{eval $.data[0].values[?(@.k == "a")].v filters an array of objs. and array values} do
+  test ~s{eval $.data[0].values[?(@.k == "a")].v filters an objects array with array values} do
     map = %{
       "data" => [
         %{
@@ -147,7 +147,7 @@ defmodule ExJsonPathTest do
 
   # This is not described [here](https://goessner.net/articles/JsonPath/)
   # but his implementation supports it, and nearly every other implementation.
-  test "hello" do
+  test "eval hello" do
     map = %{"hello" => %{"world" => "test"}}
     path = "hello"
 
@@ -156,7 +156,7 @@ defmodule ExJsonPathTest do
 
   # This is not described [here](https://goessner.net/articles/JsonPath/)
   # but his implementation supports it, and nearly every other implementation.
-  test "hello.world" do
+  test "eval hello.world" do
     map = %{"hello" => %{"world" => "test"}}
     path = "hello.world"
 
