@@ -27,7 +27,17 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(map, path) == {:ok, ["test"]}
   end
 
-  test "eval $.data.values[1]" do
+  # goessner's implementation (and others) return [["test"]] here.
+  # Few other implementations will return ["test"].
+  # Here we behave like goessner's one.
+  test "eval $.hello.world with single value array" do
+    map = %{"hello" => %{"world" => ["test"]}}
+    path = "$.hello.world"
+
+    assert ExJsonPath.eval(map, path) == {:ok, [["test"]]}
+  end
+
+  test "eval $.data.values[1] returns an array item" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values[1]"
 
@@ -57,6 +67,46 @@ defmodule ExJsonPathTest do
     path = ~s{$.data[0].values[?(@.name == "test")].value}
 
     assert ExJsonPath.eval(map, path) == {:ok, [0.3]}
+  end
+
+  test ~s{eval $.data[0].values[?(@.name == "test")].value filters an array with missing keys} do
+    map = %{
+      "data" => [
+        %{
+          "values" => [
+            %{"value" => 0.0, "name" => "test"},
+            %{"name" => "foo"},
+            %{"value" => 0.2},
+            %{"value" => 0.3, "name" => "test"},
+            %{"value" => 0.4, "name" => "bar"}
+          ]
+        }
+      ]
+    }
+
+    path = ~s{$.data[0].values[?(@.name == "test")].value}
+
+    assert ExJsonPath.eval(map, path) == {:ok, [0.0, 0.3]}
+  end
+
+  test ~s{eval $.data[0].values[?(@.k == "a")].v filters an array of objs. and array values} do
+    map = %{
+      "data" => [
+        %{
+          "values" => [
+            %{"v" => [0.0], "k" => "a"},
+            %{"k" => "c"},
+            %{"v" => [0.2]},
+            %{"v" => [0.3], "k" => "a"},
+            %{"v" => [0.4], "k" => "b"}
+          ]
+        }
+      ]
+    }
+
+    path = ~s{$.data[0].values[?(@.k == "a")].v}
+
+    assert ExJsonPath.eval(map, path) == {:ok, [[0.0], [0.3]]}
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters a map} do
