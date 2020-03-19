@@ -26,6 +26,7 @@ defmodule ExJsonPath.MixProject do
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      package: package(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         coveralls: :test,
@@ -44,7 +45,21 @@ defmodule ExJsonPath.MixProject do
 
   defp deps do
     [
-      {:excoveralls, "~> 0.11", only: :test}
+      {:excoveralls, "~> 0.11", only: :test},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
+
+  defp package do
+    [
+      description: "JSONPath library for Elixir",
+      maintainers: ["Davide Bettio"],
+      licenses: ["Apache-2.0"],
+      links: %{
+        "GitHub" => "https://github.com/ispirata/exjsonpath",
+        "Documentation" => "http://hexdocs.pm/exjsonpath"
+      }
+    ]
+  end
+
 end
