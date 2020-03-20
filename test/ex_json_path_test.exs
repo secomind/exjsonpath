@@ -222,6 +222,29 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(map, path) == {:ok, ["test"]}
   end
 
+  # This shortcut is supported by fewer implementations, however I think it must be supported
+  # for consistency reasons: "keyname" shortcut is already supported for objects, thefore [index]
+  # is a reasonable extension.
+  # Goessner's implementation does not support it.
+  test "eval [0]" do
+    array = [10, 11, 12, 13]
+    path = "[3]"
+
+    assert ExJsonPath.eval(array, path) == {:ok, [13]}
+  end
+
+  # The majority of implementations do not support this, however this is a side effect
+  # of adding support to "[index]" with minimum changes to our grammar.
+  # One notable implementation which supports this syntax is the kubectl JSONPath implementation,
+  # hence I think also a lot of people is used to this syntax,
+  # which doesn't cause any relevant drawback
+  test "eval .key" do
+    map = %{"key" => 42}
+    path = ".key"
+
+    assert ExJsonPath.eval(map, path) == {:ok, [42]}
+  end
+
   # Goessner's implementation (and others) do not allow any kind of match on bare values
   test "eval $.test on bare values doesn't match" do
     value = 5
