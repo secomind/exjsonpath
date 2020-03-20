@@ -17,14 +17,16 @@
 #
 
 defmodule ExJsonPath do
-  def eval(map, path) when is_map(map) and is_binary(path) do
+  defguard is_valid_input(input) when is_map(input) or is_list(input)
+
+  def eval(input, path) when is_valid_input(input) and is_binary(path) do
     with {:ok, compiled} <- compile(path) do
-      eval(map, compiled)
+      eval(input, compiled)
     end
   end
 
-  def eval(map, compiled_path) when is_map(map) and is_list(compiled_path) do
-    recurse(map, compiled_path)
+  def eval(input, compiled_path) when is_valid_input(input) and is_list(compiled_path) do
+    recurse(input, compiled_path)
   end
 
   def compile(path) when is_binary(path) do
