@@ -86,6 +86,13 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(map, path) == {:error, :no_match}
   end
 
+  test "eval $[0] on array root item" do
+    array = [10, 11, 12, 13]
+    path = "$[0]"
+
+    assert ExJsonPath.eval(array, path) == {:ok, [10]}
+  end
+
   test "eval $.data.values[1].value" do
     map = %{"data" => %{"values" => [%{"value" => 0.1}, %{"value" => 0.2}, %{"value" => 0.3}]}}
     path = "$.data.values[1].value"
