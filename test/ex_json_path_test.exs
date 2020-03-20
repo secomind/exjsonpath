@@ -34,6 +34,16 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(map, path) == {:error, :no_match}
   end
 
+  # there are two Goessner's implementations, one returns [[]], while the other returns [{}]
+  # most other implementations return [{}].
+  # This implementation will return [{}]
+  test "eval $.foo.bar with empty obj. 'bar' returns {}" do
+    map = %{"foo" => %{"bar" => %{}}}
+    path = "$.foo.bar"
+
+    assert ExJsonPath.eval(map, path) == {:ok, [%{}]}
+  end
+
   test "eval $.hello[0] on an object doesn't match" do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello[0]"
