@@ -78,6 +78,10 @@ defmodule ExJsonPath do
     end
   end
 
+  defp recurse(_any, [{:access, _a} | _t]) do
+    {:error, :no_match}
+  end
+
   defp compare(op, value1, value2) do
     case op do
       :== ->
