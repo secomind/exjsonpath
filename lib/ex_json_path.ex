@@ -17,14 +17,14 @@
 #
 
 defmodule ExJsonPath do
-  def eval(map, path) when is_map(map) and is_binary(path) do
+  def eval(input, path) when is_binary(path) do
     with {:ok, compiled} <- compile(path) do
-      eval(map, compiled)
+      eval(input, compiled)
     end
   end
 
-  def eval(map, compiled_path) when is_map(map) and is_list(compiled_path) do
-    recurse(map, compiled_path)
+  def eval(input, compiled_path) when is_list(compiled_path) do
+    recurse(input, compiled_path)
   end
 
   def compile(path) when is_binary(path) do
@@ -35,27 +35,33 @@ defmodule ExJsonPath do
   end
 
   defp recurse(item, []) do
-    item
+    {:ok, [item]}
   end
 
   defp recurse(enumerable, [{:access, {op, path, value}} | t])
        when is_list(enumerable) or is_map(enumerable) do
-    Enum.reduce(enumerable, [], fn entry, acc ->
-      item =
-        case entry do
-          {_key, value} -> value
-          item -> item
+    result =
+      Enum.reduce(enumerable, [], fn entry, acc ->
+        item =
+          case entry do
+            {_key, value} -> value
+            item -> item
+          end
+
+        with {:ok, [value_at_path]} <- recurse(item, path),
+             true <- compare(op, value_at_path, value),
+             {:ok, [leaf_value]} <- recurse(item, t) do
+          [leaf_value | acc]
+        else
+          {:error, :no_match} ->
+            acc
+
+          false ->
+            acc
         end
+      end)
 
-      value_at_path = recurse(item, path)
-
-      if compare(op, value_at_path, value) do
-        [recurse(item, t) | acc]
-      else
-        acc
-      end
-    end)
-    |> Enum.reverse()
+    {:ok, Enum.reverse(result)}
   end
 
   defp recurse(map, [{:access, a} | t]) when is_map(map) do
@@ -66,8 +72,14 @@ defmodule ExJsonPath do
   end
 
   defp recurse(array, [{:access, a} | t]) when is_list(array) and is_integer(a) do
-    next_item = Enum.at(array, a)
-    recurse(next_item, t)
+    case Enum.fetch(array, a) do
+      {:ok, next_item} -> recurse(next_item, t)
+      :error -> {:error, :no_match}
+    end
+  end
+
+  defp recurse(_any, [{:access, _a} | _t]) do
+    {:error, :no_match}
   end
 
   defp compare(op, value1, value2) do
