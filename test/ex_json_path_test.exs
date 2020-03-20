@@ -211,4 +211,20 @@ defmodule ExJsonPathTest do
 
     assert ExJsonPath.eval(map, path) == {:ok, ["test"]}
   end
+
+  # Goessner's implementation (and others) do not allow any kind of match on bare values
+  test "eval $.test on bare values doesn't match" do
+    value = 5
+    path = "$.test"
+
+    assert ExJsonPath.eval(value, path) == {:error, :no_match}
+  end
+
+  # Goessner's implementation (and others) do not allow any kind of match on bare values
+  test "eval $[0] on bare values doesn't match" do
+    value = true
+    path = "$[0]"
+
+    assert ExJsonPath.eval(value, path) == {:error, :no_match}
+  end
 end
