@@ -27,6 +27,27 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(map, path) == {:ok, ["test"]}
   end
 
+  test "eval $.hello.world.this.is.missing doesn't match" do
+    map = %{"hello" => %{"world" => "test"}}
+    path = "$.hello.world.this.is.missing"
+
+    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+  end
+
+  test "eval $.hello[0] on an object doesn't match" do
+    map = %{"hello" => %{"world" => "test"}}
+    path = "$.hello[0]"
+
+    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+  end
+
+  test "eval $.hello.world[0] on a string doesn't match" do
+    map = %{"hello" => %{"world" => "test"}}
+    path = "$.hello.world[0]"
+
+    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+  end
+
   # goessner's implementation (and others) return [["test"]] here.
   # Few other implementations will return ["test"].
   # Here we behave like goessner's one.
@@ -42,6 +63,27 @@ defmodule ExJsonPathTest do
     path = "$.data.values[1]"
 
     assert ExJsonPath.eval(map, path) == {:ok, [-1]}
+  end
+
+  test "eval $.data.values[4] which causes an out of bonds access" do
+    map = %{"data" => %{"values" => [0, -1, 1, -2]}}
+    path = "$.data.values[4]"
+
+    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+  end
+
+  test "eval $.data.missing[0] on missing key doesn't match" do
+    map = %{"data" => %{"values" => [0, -1, 1, -2]}}
+    path = "$.data.missing[0]"
+
+    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+  end
+
+  test "eval $.data.values.missing doesn't match" do
+    map = %{"data" => %{"values" => [0, -1, 1, -2]}}
+    path = "$.data.values.missing"
+
+    assert ExJsonPath.eval(map, path) == {:error, :no_match}
   end
 
   test "eval $.data.values[1].value" do
