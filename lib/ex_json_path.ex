@@ -84,6 +84,18 @@ defmodule ExJsonPath do
 
   defp compare(op, value1, value2) do
     case op do
+      :> ->
+        value1 > value2
+
+      :>= ->
+        value1 >= value2
+
+      :< ->
+        value1 < value2
+
+      :<= ->
+        value1 <= value2
+
       :== ->
         value1 == value2
 
