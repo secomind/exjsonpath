@@ -31,7 +31,7 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello.world.this.is.missing"
 
-    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+    assert ExJsonPath.eval(map, path) == {:ok, []}
   end
 
   # there are two Goessner's implementations, one returns [[]], while the other returns [{}]
@@ -48,14 +48,14 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello[0]"
 
-    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+    assert ExJsonPath.eval(map, path) == {:ok, []}
   end
 
   test "eval $.hello.world[0] on a string doesn't match" do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello.world[0]"
 
-    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+    assert ExJsonPath.eval(map, path) == {:ok, []}
   end
 
   # goessner's implementation (and others) return [["test"]] here.
@@ -79,21 +79,21 @@ defmodule ExJsonPathTest do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values[4]"
 
-    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+    assert ExJsonPath.eval(map, path) == {:ok, []}
   end
 
   test "eval $.data.missing[0] on missing key doesn't match" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.missing[0]"
 
-    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+    assert ExJsonPath.eval(map, path) == {:ok, []}
   end
 
   test "eval $.data.values.missing doesn't match" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values.missing"
 
-    assert ExJsonPath.eval(map, path) == {:error, :no_match}
+    assert ExJsonPath.eval(map, path) == {:ok, []}
   end
 
   test "eval $[0] on array root item" do
@@ -250,7 +250,7 @@ defmodule ExJsonPathTest do
     value = 5
     path = "$.test"
 
-    assert ExJsonPath.eval(value, path) == {:error, :no_match}
+    assert ExJsonPath.eval(value, path) == {:ok, []}
   end
 
   # Goessner's implementation (and others) do not allow any kind of match on bare values
@@ -258,6 +258,6 @@ defmodule ExJsonPathTest do
     value = true
     path = "$[0]"
 
-    assert ExJsonPath.eval(value, path) == {:error, :no_match}
+    assert ExJsonPath.eval(value, path) == {:ok, []}
   end
 end

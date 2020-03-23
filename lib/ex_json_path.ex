@@ -53,7 +53,7 @@ defmodule ExJsonPath do
              {:ok, [leaf_value]} <- recurse(item, t) do
           [leaf_value | acc]
         else
-          {:error, :no_match} ->
+          {:ok, []} ->
             acc
 
           false ->
@@ -67,19 +67,19 @@ defmodule ExJsonPath do
   defp recurse(map, [{:access, a} | t]) when is_map(map) do
     case Map.fetch(map, a) do
       {:ok, next_item} -> recurse(next_item, t)
-      :error -> {:error, :no_match}
+      :error -> {:ok, []}
     end
   end
 
   defp recurse(array, [{:access, a} | t]) when is_list(array) and is_integer(a) do
     case Enum.fetch(array, a) do
       {:ok, next_item} -> recurse(next_item, t)
-      :error -> {:error, :no_match}
+      :error -> {:ok, []}
     end
   end
 
   defp recurse(_any, [{:access, _a} | _t]) do
-    {:error, :no_match}
+    {:ok, []}
   end
 
   defp compare(op, value1, value2) do
