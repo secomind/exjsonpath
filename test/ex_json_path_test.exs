@@ -260,4 +260,89 @@ defmodule ExJsonPathTest do
 
     assert ExJsonPath.eval(value, path) == {:ok, []}
   end
+
+  describe "eval $[?(@.v OPERATOR 1)] expressions" do
+    test ~s{with == operator} do
+      array = [
+        %{"k" => "a", "v" => 0},
+        %{"k" => "b", "v" => 1},
+        %{"k" => "c", "v" => 1},
+        %{"k" => "d", "v" => 0}
+      ]
+
+      path = ~s{$[?(@.v == 1)]}
+
+      assert ExJsonPath.eval(array, path) ==
+               {:ok, [%{"k" => "b", "v" => 1}, %{"k" => "c", "v" => 1}]}
+    end
+
+    test ~s{!= operator} do
+      array = [
+        %{"k" => "a", "v" => 0},
+        %{"k" => "b", "v" => 1},
+        %{"k" => "c", "v" => 1},
+        %{"k" => "d", "v" => 0}
+      ]
+
+      path = ~s{$[?(@.v != 1)]}
+
+      assert ExJsonPath.eval(array, path) ==
+               {:ok, [%{"k" => "a", "v" => 0}, %{"k" => "d", "v" => 0}]}
+    end
+
+    test ~s{with > operator} do
+      array = [
+        %{"k" => "a", "v" => 0},
+        %{"k" => "b", "v" => 1},
+        %{"k" => "c", "v" => 2},
+        %{"k" => "d", "v" => 0}
+      ]
+
+      path = ~s{$[?(@.v > 1)]}
+
+      assert ExJsonPath.eval(array, path) == {:ok, [%{"k" => "c", "v" => 2}]}
+    end
+
+    test ~s{with >= operator} do
+      array = [
+        %{"k" => "a", "v" => 0},
+        %{"k" => "b", "v" => 1},
+        %{"k" => "c", "v" => 2},
+        %{"k" => "d", "v" => 0}
+      ]
+
+      path = ~s{$[?(@.v >= 1)]}
+
+      assert ExJsonPath.eval(array, path) ==
+               {:ok, [%{"k" => "b", "v" => 1}, %{"k" => "c", "v" => 2}]}
+    end
+
+    test ~s{with < operator} do
+      array = [
+        %{"k" => "a", "v" => 0},
+        %{"k" => "b", "v" => 1},
+        %{"k" => "c", "v" => 1},
+        %{"k" => "d", "v" => 0}
+      ]
+
+      path = ~s{$[?(@.v < 1)]}
+
+      assert ExJsonPath.eval(array, path) ==
+               {:ok, [%{"k" => "a", "v" => 0}, %{"k" => "d", "v" => 0}]}
+    end
+
+    test ~s{with <= operator} do
+      array = [
+        %{"k" => "a", "v" => 1},
+        %{"k" => "b", "v" => 2},
+        %{"k" => "c", "v" => 3},
+        %{"k" => "d", "v" => 0}
+      ]
+
+      path = ~s{$[?(@.v <= 2)]}
+
+      assert ExJsonPath.eval(array, path) ==
+               {:ok, [%{"v" => 1, "k" => "a"}, %{"k" => "b", "v" => 2}, %{"k" => "d", "v" => 0}]}
+    end
+  end
 end
