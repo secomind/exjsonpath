@@ -20,6 +20,8 @@ defmodule ExJsonPathTest do
   use ExUnit.Case
   doctest ExJsonPath
 
+  alias ExJsonPath.ParsingError
+
   test "eval $.hello.world" do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello.world"
@@ -343,6 +345,51 @@ defmodule ExJsonPathTest do
 
       assert ExJsonPath.eval(array, path) ==
                {:ok, [%{"v" => 1, "k" => "a"}, %{"k" => "b", "v" => 2}, %{"k" => "d", "v" => 0}]}
+    end
+  end
+
+  describe "parsing error" do
+    test ~s{with eval $} do
+      map = %{"a" => %{"b" => 42}}
+      path = ~s{$}
+
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+    end
+
+    test ~s{with eval @} do
+      map = %{"a" => %{"b" => 42}}
+      path = ~s{@}
+
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+    end
+
+    test "with invalid expression" do
+      map = %{"a" => %{"b" => 42}}
+      path = ~s{$[?()]}
+
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+    end
+
+    test "with unmatched parenthesis" do
+      map = %{"a" => %{"b" => 42}}
+      path = ~s{$[?(@.v <= 2]}
+
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+    end
+
+    test "with invalid operator" do
+      array = []
+
+      path = ~s{$[?(@.v # 2)]}
+
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(array, path)
+    end
+
+    test "with unexpected chars" do
+      map = %{"a" => %{"b" => 42}}
+      path = ~s{ùùù}
+
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
     end
   end
 end
