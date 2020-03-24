@@ -17,6 +17,31 @@
 #
 
 defmodule ExJsonPath do
+  @moduledoc """
+  This module implements a JSONPath evaluator.
+  """
+
+  @opaque compiled_path :: list({:access, String.t()})
+
+  @doc """
+  Evaluate JSONPath on given input.
+
+  Returns `{:ok, [result1 | results]}` on success, {:error, reason} otherwise.
+
+  ## Examples
+
+    iex> ExJsonPath.eval(%{"a" => %{"b" => 42}}, "$.a.b")
+    {:ok, [42]}
+
+    iex> ExJsonPath.eval([%{"v" => 1}, %{"v" => 2}, %{"v" => 3}], "$[?(@.v > 1)].v")
+    {:ok, [2, 3]}
+
+    iex> ExJsonPath.eval(%{"a" => %{"b" => 42}}, "$.x.y")
+    {:ok, []}
+  """
+  @spec eval(term(), String.t() | compiled_path()) :: {:ok, list(term())} | {:error, term()}
+  def eval(input, jsonpath)
+
   def eval(input, path) when is_binary(path) do
     with {:ok, compiled} <- compile(path) do
       eval(input, compiled)
@@ -27,6 +52,12 @@ defmodule ExJsonPath do
     recurse(input, compiled_path)
   end
 
+  @doc """
+  Parse and compile a path.
+
+  Returns a {:ok, compiled_path} on success, {:error, reason} otherwise.
+  """
+  @spec compile(String.t()) :: {:ok, compiled_path()} | {:error, term()}
   def compile(path) when is_binary(path) do
     with charlist = String.to_charlist(path),
          {:ok, tokens, _} <- :jsonpath_lexer.string(charlist) do

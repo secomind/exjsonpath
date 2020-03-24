@@ -18,6 +18,22 @@ end
 ```
 - Run `mix deps.get`
 
+## Basic Usage
+
+```elixir
+iex(1)> ExJsonPath.eval([%{"v" => 1}, %{"v" => 2}, %{"v" => 3}], "$[?(@.v > 1)].v")
+{:ok, [2, 3]}
+```
+
+```elixir
+iex(1)> {:ok, json} = File.read("store.json")
+iex(2)> {:ok, store} = Jason.decode(json)
+iex(3)> ExJsonPath.eval(store, "$.store.book[?(@.price > 20)].title")
+{:ok, ["The Lord of the Rings"]}
+```
+
+Full documentation can be found at [hexdocs.pm/exjsonpath](https://hexdocs.pm/exjsonpath).
+
 ## About This Project
 
 This project has been created in order to provide support to JSONPath to [Astarte Flow](https://github.com/astarte-platform/astarte_flow).
