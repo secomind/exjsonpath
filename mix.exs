@@ -1,7 +1,7 @@
 #
 # This file is part of ExJsonPath.
 #
-# Copyright 2019 Ispirata Srl
+# Copyright 2019,2020 Ispirata Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ defmodule ExJsonPath.MixProject do
   defp deps do
     [
       {:excoveralls, "~> 0.11", only: :test},
+      {:dialyzex, "~> 1.2.0", only: :dev, runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end

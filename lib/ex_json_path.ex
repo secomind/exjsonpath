@@ -1,7 +1,7 @@
 #
 # This file is part of ExJsonPath.
 #
-# Copyright 2019 Ispirata Srl
+# Copyright 2019,2020 Ispirata Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ defmodule ExJsonPath do
   This module implements a JSONPath evaluator.
   """
 
+  alias ExJsonPath.ParsingError
+
   @opaque compiled_path :: list({:access, String.t()})
 
   @doc """
   Evaluate JSONPath on given input.
 
-  Returns `{:ok, [result1 | results]}` on success, {:error, reason} otherwise.
+  Returns `{:ok, [result1 | results]}` on success, {:error, %ExJsonPath.ParsingError{}} otherwise.
 
   ## Examples
 
@@ -39,7 +41,8 @@ defmodule ExJsonPath do
     iex> ExJsonPath.eval(%{"a" => %{"b" => 42}}, "$.x.y")
     {:ok, []}
   """
-  @spec eval(term(), String.t() | compiled_path()) :: {:ok, list(term())} | {:error, term()}
+  @spec eval(term(), String.t() | compiled_path()) ::
+          {:ok, list(term())} | {:error, ParsingError.t()}
   def eval(input, jsonpath)
 
   def eval(input, path) when is_binary(path) do
@@ -57,11 +60,28 @@ defmodule ExJsonPath do
 
   Returns a {:ok, compiled_path} on success, {:error, reason} otherwise.
   """
-  @spec compile(String.t()) :: {:ok, compiled_path()} | {:error, term()}
+  @spec compile(String.t()) :: {:ok, compiled_path()} | {:error, ParsingError.t()}
   def compile(path) when is_binary(path) do
     with charlist = String.to_charlist(path),
-         {:ok, tokens, _} <- :jsonpath_lexer.string(charlist) do
-      :jsonpath_parser.parse(tokens)
+         {:ok, tokens, _} <- :jsonpath_lexer.string(charlist),
+         {:ok, compiled} <- :jsonpath_parser.parse(tokens) do
+      {:ok, compiled}
+    else
+      {:error, {_line, :jsonpath_lexer, error_desc}, _} ->
+        message_string =
+          error_desc
+          |> :jsonpath_lexer.format_error()
+          |> List.to_string()
+
+        {:error, %ParsingError{message: message_string}}
+
+      {:error, {_line, :jsonpath_parser, message}} ->
+        message_string =
+          message
+          |> :jsonpath_parser.format_error()
+          |> List.to_string()
+
+        {:error, %ParsingError{message: message_string}}
     end
   end
 
