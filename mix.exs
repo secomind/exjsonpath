@@ -46,6 +46,7 @@ defmodule ExJsonPath.MixProject do
   defp deps do
     [
       {:excoveralls, "~> 0.11", only: :test},
+      {:dialyzex, "~> 1.2.0", only: :dev, runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
