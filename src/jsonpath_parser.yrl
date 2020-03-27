@@ -20,8 +20,10 @@ Nonterminals jsonpath path child filter_expression expression value comparison_o
 Terminals '.' '..' '$' '[' ']' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
 Rootsymbol jsonpath.
 
+jsonpath -> integer : [{access, extract_token('$1')}].
 jsonpath -> identifier : [{access, extract_token('$1')}].
 jsonpath -> child : '$1'.
+jsonpath -> integer path : [{access, extract_token('$1')} | '$2'].
 jsonpath -> identifier path : [{access, extract_token('$1')} | '$2'].
 jsonpath -> '$' path : '$2'.
 
