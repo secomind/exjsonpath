@@ -29,6 +29,7 @@ path -> child : '$1'.
 path -> path child : '$1' ++ '$2'.
 
 child -> '.' identifier : [{access, extract_token('$2')}].
+child -> '.' integer : [{access, extract_token('$2')}].
 child -> '[' integer ']' : [{access, extract_token('$2')}].
 child -> '[' string ']' : [{access, extract_token('$2')}].
 child -> '[' filter_expression ']' : [{access, '$2'}].
