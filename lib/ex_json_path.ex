@@ -93,18 +93,17 @@ defmodule ExJsonPath do
     end
   end
 
-  defp recurse(item, []) do
-    [item]
-  end
+  defp recurse(item, []),
+    do: [item]
 
   defp recurse(enumerable, [{:access, {op, path, value}} | t])
        when is_list(enumerable) or is_map(enumerable) do
-    result =
+    results =
       Enum.reduce(enumerable, [], fn entry, acc ->
         item =
           case entry do
             {_key, value} -> value
-            item -> item
+            value -> value
           end
 
         with [value_at_path] <- recurse(item, path),
@@ -112,15 +111,12 @@ defmodule ExJsonPath do
              [leaf_value] <- recurse(item, t) do
           [leaf_value | acc]
         else
-          [] ->
-            acc
-
-          false ->
-            acc
+          [] -> acc
+          false -> acc
         end
       end)
 
-    Enum.reverse(result)
+    Enum.reverse(results)
   end
 
   defp recurse(map, [{:access, a} | t]) when is_map(map) do
@@ -137,43 +133,37 @@ defmodule ExJsonPath do
     end
   end
 
-  defp recurse(_any, [{:access, _a} | _t]) do
-    []
-  end
+  defp recurse(_any, [{:access, _a} | _t]),
+    do: []
 
   defp recurse(enumerable, [{:recurse, a} | t] = path)
        when is_map(enumerable) or is_list(enumerable) do
-    result =
-      Enum.reduce(enumerable, [], fn entry, acc ->
-        item =
-          case entry do
-            {_key, value} -> value
-            item -> item
-          end
+    descent_results =
+      Enum.reduce(enumerable, [], fn
+        {_key, item}, acc ->
+          acc ++ recurse(item, path)
 
-        result = recurse(item, path)
-        acc ++ result
+        item, acc ->
+          acc ++ recurse(item, path)
       end)
 
     case safe_fetch(enumerable, a) do
-      {:ok, item} ->
-        rec = recurse(item, t)
-        rec ++ result
-
-      :error ->
-        result
+      {:ok, item} -> recurse(item, t) ++ descent_results
+      :error -> descent_results
     end
   end
 
-  defp recurse(_any, [{:recurse, _a} | _t]) do
-    []
-  end
+  defp recurse(_any, [{:recurse, _a} | _t]),
+    do: []
 
   defp safe_fetch(list, index) when is_list(list) and is_integer(index),
     do: Enum.fetch(list, index)
 
-  defp safe_fetch(list, _index) when is_list(list), do: :error
-  defp safe_fetch(%{} = map, key), do: Map.fetch(map, key)
+  defp safe_fetch(list, _index) when is_list(list),
+    do: :error
+
+  defp safe_fetch(%{} = map, key),
+    do: Map.fetch(map, key)
 
   defp compare(op, value1, value2) do
     case op do
