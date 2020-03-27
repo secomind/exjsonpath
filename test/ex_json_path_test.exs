@@ -237,11 +237,27 @@ defmodule ExJsonPathTest do
   # for consistency reasons: "keyname" shortcut is already supported for objects, thefore [index]
   # is a reasonable extension.
   # Goessner's implementation does not support it.
-  test "eval [0]" do
+  test "eval [3]" do
     array = [10, 11, 12, 13]
     path = "[3]"
 
     assert ExJsonPath.eval(array, path) == {:ok, [13]}
+  end
+
+  # This is supported by Goessner's implementation and some others.
+  test "eval 3" do
+    array = [10, 11, 12, 13]
+    path = "3"
+
+    assert ExJsonPath.eval(array, path) == {:ok, [13]}
+  end
+
+  # This is supported by Goessner's implementation and some others.
+  test "eval 1.name" do
+    array = [%{"name" => "zero"}, %{"name" => "one"}, %{"name" => "two"}]
+    path = "1.name"
+
+    assert ExJsonPath.eval(array, path) == {:ok, ["one"]}
   end
 
   # The majority of implementations do not support this, however this is a side effect
