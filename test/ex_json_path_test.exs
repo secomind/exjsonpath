@@ -263,6 +263,121 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(value, path) == {:ok, []}
   end
 
+  describe ".. operator" do
+    test "eval $..a on a nested object" do
+      map = %{
+        "a" => 0,
+        "b" => %{
+          "a" => 1,
+          "b" => %{
+            "a" => 2,
+            "b" => %{
+              "a" => 3,
+              "b" => %{
+                "a" => 4,
+                "b" => %{}
+              }
+            }
+          }
+        }
+      }
+
+      path = ~s{$..a}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [0, 1, 2, 3, 4]}
+    end
+
+    test "eval $..missing on a nested object" do
+      map = %{
+        "a" => 0,
+        "b" => %{
+          "a" => 1,
+          "b" => %{
+            "a" => 2,
+            "b" => %{
+              "a" => 3,
+              "b" => %{
+                "a" => 4,
+                "b" => %{}
+              }
+            }
+          }
+        }
+      }
+
+      path = ~s{$..missing}
+
+      assert ExJsonPath.eval(map, path) == {:ok, []}
+    end
+
+    test "eval $..b on a nested object" do
+      map = %{"a" => 0, "b" => %{"a" => 1, "b" => %{"a" => 2, "b" => %{}}}}
+      path = ~s{$..b}
+
+      assert ExJsonPath.eval(map, path) ==
+               {:ok, [%{"a" => 1, "b" => %{"a" => 2, "b" => %{}}}, %{"a" => 2, "b" => %{}}, %{}]}
+    end
+
+    test "eval $..k on an array" do
+      array = [%{"k" => "a"}, %{"k" => "c"}, %{"k" => "b"}]
+
+      path = ~s{$..k}
+
+      assert ExJsonPath.eval(array, path) == {:ok, ["a", "c", "b"]}
+    end
+
+    test "eval $..k on an empty array" do
+      array = []
+
+      path = ~s{$..k}
+
+      assert ExJsonPath.eval(array, path) == {:ok, []}
+    end
+
+    test "eval $..k on an empty object" do
+      map = %{}
+
+      path = ~s{$..k}
+
+      assert ExJsonPath.eval(map, path) == {:ok, []}
+    end
+
+    test "eval $..2" do
+      map = %{
+        "a" => [0, 1, 2],
+        "b" => %{"c" => [3], "d" => [4, 5, "6"], "e" => %{"f" => [7, 8, [], 10]}}
+      }
+
+      path = ~s{$..2}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [2, "6", []]}
+    end
+
+    test "eval $..2 on a nested array" do
+      array = [1, 2, [5, 6, [7, 8, 9]]]
+
+      path = ~s{$..2}
+
+      assert ExJsonPath.eval(array, path) == {:ok, [[5, 6, [7, 8, 9]], [7, 8, 9], 9]}
+    end
+
+    test "eval $..1.x on a nested array" do
+      array = [0, [1, [2, %{"x" => "computer"}]]]
+
+      path = ~s{$..1.x}
+
+      assert ExJsonPath.eval(array, path) == {:ok, ["computer"]}
+    end
+
+    test "eval $..1.x on a nested array with an array leaf" do
+      array = [0, [1, [2, %{"x" => ["test", -1]}]]]
+
+      path = ~s{$..1.x}
+
+      assert ExJsonPath.eval(array, path) == {:ok, [["test", -1]]}
+    end
+  end
+
   describe "eval $[?(@.v OPERATOR 1)] expressions" do
     test ~s{with == operator} do
       array = [
