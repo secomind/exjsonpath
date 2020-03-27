@@ -31,6 +31,7 @@ defmodule ExJsonPath do
               {:access, path_token()}
               | {:access, {op(), compiled_path(), term()}}
               | {:recurse, path_token()}
+              | :wildcard
             )
 
   @doc """
@@ -155,6 +156,15 @@ defmodule ExJsonPath do
 
   defp recurse(_any, [{:recurse, _a} | _t]),
     do: []
+
+  defp recurse(%{} = map, [:wildcard | t]) do
+    Map.values(map)
+    |> Enum.reduce([], fn item, acc -> acc ++ recurse(item, t) end)
+  end
+
+  defp recurse(list, [:wildcard | t]) when is_list(list) do
+    Enum.reduce(list, [], fn item, acc -> acc ++ recurse(item, t) end)
+  end
 
   defp safe_fetch(list, index) when is_list(list) and is_integer(index),
     do: Enum.fetch(list, index)
