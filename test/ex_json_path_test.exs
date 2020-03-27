@@ -77,6 +77,15 @@ defmodule ExJsonPathTest do
     assert ExJsonPath.eval(map, path) == {:ok, [-1]}
   end
 
+  # Goessner's implementation supports this syntax.
+  # Also this is required for consistency reasons with .. operator.
+  test "eval $.data.values.1 returns an array item" do
+    map = %{"data" => %{"values" => [0, -1, 1, -2]}}
+    path = "$.data.values.1"
+
+    assert ExJsonPath.eval(map, path) == {:ok, [-1]}
+  end
+
   test "eval $.data.values[4] which causes an out of bonds access" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values[4]"
@@ -245,6 +254,14 @@ defmodule ExJsonPathTest do
     path = ".key"
 
     assert ExJsonPath.eval(map, path) == {:ok, [42]}
+  end
+
+  # This is just supported for consistency reasons, since we already support .key
+  test "eval .1" do
+    map = [0, 10, 20, 30]
+    path = ".1"
+
+    assert ExJsonPath.eval(map, path) == {:ok, [10]}
   end
 
   # Goessner's implementation (and others) do not allow any kind of match on bare values
