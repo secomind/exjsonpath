@@ -23,7 +23,15 @@ defmodule ExJsonPath do
 
   alias ExJsonPath.ParsingError
 
-  @opaque compiled_path :: list({:access, String.t()})
+  @opaque path_token :: String.t() | pos_integer()
+  @opaque op :: :> | :>= | :< | :<= | :== | :!=
+
+  @opaque compiled_path ::
+            list(
+              {:access, path_token()}
+              | {:access, {op(), compiled_path(), term()}}
+              | {:recurse, path_token()}
+            )
 
   @doc """
   Evaluate JSONPath on given input.
@@ -52,7 +60,7 @@ defmodule ExJsonPath do
   end
 
   def eval(input, compiled_path) when is_list(compiled_path) do
-    recurse(input, compiled_path)
+    {:ok, recurse(input, compiled_path)}
   end
 
   @doc """
@@ -85,53 +93,77 @@ defmodule ExJsonPath do
     end
   end
 
-  defp recurse(item, []) do
-    {:ok, [item]}
-  end
+  defp recurse(item, []),
+    do: [item]
 
   defp recurse(enumerable, [{:access, {op, path, value}} | t])
        when is_list(enumerable) or is_map(enumerable) do
-    result =
+    results =
       Enum.reduce(enumerable, [], fn entry, acc ->
         item =
           case entry do
             {_key, value} -> value
-            item -> item
+            value -> value
           end
 
-        with {:ok, [value_at_path]} <- recurse(item, path),
+        with [value_at_path] <- recurse(item, path),
              true <- compare(op, value_at_path, value),
-             {:ok, [leaf_value]} <- recurse(item, t) do
+             [leaf_value] <- recurse(item, t) do
           [leaf_value | acc]
         else
-          {:ok, []} ->
-            acc
-
-          false ->
-            acc
+          [] -> acc
+          false -> acc
         end
       end)
 
-    {:ok, Enum.reverse(result)}
+    Enum.reverse(results)
   end
 
   defp recurse(map, [{:access, a} | t]) when is_map(map) do
     case Map.fetch(map, a) do
       {:ok, next_item} -> recurse(next_item, t)
-      :error -> {:ok, []}
+      :error -> []
     end
   end
 
   defp recurse(array, [{:access, a} | t]) when is_list(array) and is_integer(a) do
     case Enum.fetch(array, a) do
       {:ok, next_item} -> recurse(next_item, t)
-      :error -> {:ok, []}
+      :error -> []
     end
   end
 
-  defp recurse(_any, [{:access, _a} | _t]) do
-    {:ok, []}
+  defp recurse(_any, [{:access, _a} | _t]),
+    do: []
+
+  defp recurse(enumerable, [{:recurse, a} | t] = path)
+       when is_map(enumerable) or is_list(enumerable) do
+    descent_results =
+      Enum.reduce(enumerable, [], fn
+        {_key, item}, acc ->
+          acc ++ recurse(item, path)
+
+        item, acc ->
+          acc ++ recurse(item, path)
+      end)
+
+    case safe_fetch(enumerable, a) do
+      {:ok, item} -> recurse(item, t) ++ descent_results
+      :error -> descent_results
+    end
   end
+
+  defp recurse(_any, [{:recurse, _a} | _t]),
+    do: []
+
+  defp safe_fetch(list, index) when is_list(list) and is_integer(index),
+    do: Enum.fetch(list, index)
+
+  defp safe_fetch(list, _index) when is_list(list),
+    do: :error
+
+  defp safe_fetch(%{} = map, key),
+    do: Map.fetch(map, key)
 
   defp compare(op, value1, value2) do
     case op do
