@@ -17,7 +17,7 @@
 %
 
 Nonterminals jsonpath path child filter_expression expression value comparison_operator.
-Terminals '.' '$' '[' ']' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
+Terminals '.' '..' '$' '[' ']' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
 Rootsymbol jsonpath.
 
 jsonpath -> identifier : [{access, extract_token('$1')}].
@@ -28,6 +28,8 @@ jsonpath -> '$' path : '$2'.
 path -> child : '$1'.
 path -> path child : '$1' ++ '$2'.
 
+child -> '..' identifier : [{recurse, extract_token('$2')}].
+child -> '..' integer : [{recurse, extract_token('$2')}].
 child -> '.' identifier : [{access, extract_token('$2')}].
 child -> '.' integer : [{access, extract_token('$2')}].
 child -> '[' integer ']' : [{access, extract_token('$2')}].

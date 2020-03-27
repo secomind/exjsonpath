@@ -23,7 +23,15 @@ defmodule ExJsonPath do
 
   alias ExJsonPath.ParsingError
 
-  @opaque compiled_path :: list({:access, String.t()})
+  @opaque path_token :: String.t() | pos_integer()
+  @opaque op :: :> | :>= | :< | :<= | :== | :!=
+
+  @opaque compiled_path ::
+            list(
+              {:access, path_token()}
+              | {:access, {op(), compiled_path(), term()}}
+              | {:recurse, path_token()}
+            )
 
   @doc """
   Evaluate JSONPath on given input.
@@ -132,6 +140,40 @@ defmodule ExJsonPath do
   defp recurse(_any, [{:access, _a} | _t]) do
     {:ok, []}
   end
+
+  defp recurse(enumerable, [{:recurse, a} | t] = path)
+       when is_map(enumerable) or is_list(enumerable) do
+    result =
+      Enum.reduce(enumerable, [], fn entry, acc ->
+        item =
+          case entry do
+            {_key, value} -> value
+            item -> item
+          end
+
+        {:ok, result} = recurse(item, path)
+        acc ++ result
+      end)
+
+    case safe_fetch(enumerable, a) do
+      {:ok, item} ->
+        {:ok, rec} = recurse(item, t)
+        {:ok, rec ++ result}
+
+      :error ->
+        {:ok, result}
+    end
+  end
+
+  defp recurse(_any, [{:recurse, _a} | _t]) do
+    {:ok, []}
+  end
+
+  defp safe_fetch(list, index) when is_list(list) and is_integer(index),
+    do: Enum.fetch(list, index)
+
+  defp safe_fetch(list, _index) when is_list(list), do: :error
+  defp safe_fetch(%{} = map, key), do: Map.fetch(map, key)
 
   defp compare(op, value1, value2) do
     case op do
