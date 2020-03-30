@@ -55,4 +55,40 @@ defmodule ExJsonPath.Parser do
                 access: "value"
               ]}
   end
+
+  test "tokenize and parse union with 2 indexes" do
+    {:ok, tokens, _} = :jsonpath_lexer.string('$.values[1,"a"].value')
+
+    assert :jsonpath_parser.parse(tokens) ==
+             {:ok,
+              [
+                access: "values",
+                union: [access: 1, access: "a"],
+                access: "value"
+              ]}
+  end
+
+  test "tokenize and parse union with 3 indexes" do
+    {:ok, tokens, _} = :jsonpath_lexer.string('$.values[1,"a",2].value')
+
+    assert :jsonpath_parser.parse(tokens) ==
+             {:ok,
+              [
+                access: "values",
+                union: [access: 1, access: "a", access: 2],
+                access: "value"
+              ]}
+  end
+
+  test "tokenize and parse union with filter" do
+    {:ok, tokens, _} = :jsonpath_lexer.string('$.values[1,?(@.a > 1)].value')
+
+    assert :jsonpath_parser.parse(tokens) ==
+             {:ok,
+              [
+                access: "values",
+                union: [access: 1, access: {:>, [access: "a"], 1}],
+                access: "value"
+              ]}
+  end
 end

@@ -445,6 +445,73 @@ defmodule ExJsonPathTest do
     end
   end
 
+  describe "union operator" do
+    test ~s{eval $.test["a","b","c"]} do
+      map = %{"test" => %{"a" => 4, "b" => "hello", "c" => 2}}
+
+      path = ~s{$.test["a","b","c"]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [4, "hello", 2]}
+    end
+
+    test ~s{eval $.test["c","b","a"]} do
+      map = %{"test" => %{"a" => 4, "b" => "hello", "c" => 2}}
+
+      path = ~s{$.test["c","b","a"]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [2, "hello", 4]}
+    end
+
+    test ~s{eval $.test["c","c","a"]} do
+      map = %{"test" => %{"a" => 4, "b" => "hello", "c" => 2}}
+
+      path = ~s{$.test["c","c","a"]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [2, 2, 4]}
+    end
+
+    test ~s{eval $.test[4,2,0]} do
+      map = %{"test" => ["0", "1", "2", "3", "4", "5"]}
+
+      path = ~s{$.test[4,2,0]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, ["4", "2", "0"]}
+    end
+
+    test ~s{eval $.test[0,0,?(@.a == "ok")]} do
+      map = %{"test" => [%{"b" => "test"}, %{"a" => "foo"}, %{"a" => "ok"}]}
+
+      path = ~s{$.test[0,0,?(@.a == "ok")]}
+
+      assert ExJsonPath.eval(map, path) ==
+               {:ok, [%{"b" => "test"}, %{"b" => "test"}, %{"a" => "ok"}]}
+    end
+
+    test ~s{eval $.test[0,100,?(@.a == "ok")]} do
+      map = %{"test" => [%{"b" => "test"}, %{"a" => "foo"}, %{"a" => "ok"}]}
+
+      path = ~s{$.test[0,100,?(@.a == "ok")]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [%{"b" => "test"}, %{"a" => "ok"}]}
+    end
+
+    test ~s{eval $.test[0,0,?(@.a == "ok")].a} do
+      map = %{"test" => [%{"b" => "test"}, %{"a" => "foo"}, %{"a" => "ok"}]}
+
+      path = ~s{$.test[0,0,?(@.a == "ok")].a}
+
+      assert ExJsonPath.eval(map, path) == {:ok, ["ok"]}
+    end
+
+    test ~s{eval $.test[0,0,?(@.a == "ok")].z} do
+      map = %{"test" => [%{"b" => "test"}, %{"a" => "foo"}, %{"a" => "ok"}]}
+
+      path = ~s{$.test[0,0,?(@.a == "ok")].z}
+
+      assert ExJsonPath.eval(map, path) == {:ok, []}
+    end
+  end
+
   describe "eval $[?(@.v OPERATOR 1)] expressions" do
     test ~s{with == operator} do
       array = [
