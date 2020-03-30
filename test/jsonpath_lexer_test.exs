@@ -1,5 +1,5 @@
 #
-# This file is part of ExJsonPath.
+# This file is part of ExJSONPath.
 #
 # Copyright 2019 Ispirata Srl
 #
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-defmodule ExJsonPath.Lexer do
+defmodule ExJSONPath.Lexer do
   use ExUnit.Case
 
   test "tokenize simple json path" do

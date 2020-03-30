@@ -1,5 +1,5 @@
 #
-# This file is part of ExJsonPath.
+# This file is part of ExJSONPath.
 #
 # Copyright 2020 Ispirata Srl
 #
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-defmodule ExJsonPath.ParsingError do
+defmodule ExJSONPath.ParsingError do
   @moduledoc """
   Describes a JSONPath parsing error.
   message contains the user readable error message.
