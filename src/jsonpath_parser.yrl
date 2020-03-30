@@ -16,7 +16,7 @@
 % limitations under the License.
 %
 
-Nonterminals jsonpath path child filter_expression expression value comparison_operator.
+Nonterminals jsonpath path child index filter_expression expression value comparison_operator.
 Terminals '.' '..' '*' '$' '[' ']' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
 Rootsymbol jsonpath.
 
@@ -35,9 +35,11 @@ child -> '..' integer : [{recurse, extract_token('$2')}].
 child -> '.' '*' : [wildcard].
 child -> '.' identifier : [{access, extract_token('$2')}].
 child -> '.' integer : [{access, extract_token('$2')}].
-child -> '[' integer ']' : [{access, extract_token('$2')}].
-child -> '[' string ']' : [{access, extract_token('$2')}].
-child -> '[' filter_expression ']' : [{access, '$2'}].
+child -> '[' index ']' : '$2'.
+
+index -> integer : [{access, extract_token('$1')}].
+index -> string : [{access, extract_token('$1')}].
+index -> filter_expression : [{access, '$1'}].
 
 filter_expression -> '?' '(' expression ')' : '$3'.
 
