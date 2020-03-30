@@ -91,4 +91,78 @@ defmodule ExJsonPath.Parser do
                 access: "value"
               ]}
   end
+
+  describe "tokenize and parse slice operator" do
+    test "1:2" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[1:2]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 1, 2, 1}]}
+    end
+
+    test "1:2:3" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[1:2:3]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 1, 2, 3}]}
+    end
+
+    test ":" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[:]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 0, :last, 1}]}
+    end
+
+    test ":1" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[:1]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 0, 1, 1}]}
+    end
+
+    test "1:" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[1:]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 1, :last, 1}]}
+    end
+
+    test "::" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[::]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 0, :last, 1}]}
+    end
+
+    test "::2" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[::2]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 0, :last, 2}]}
+    end
+
+    test ":2:" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[:2:]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 0, 2, 1}]}
+    end
+
+    test ":2:3" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[:2:3]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 0, 2, 3}]}
+    end
+
+    test "2::" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[2::]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 2, :last, 1}]}
+    end
+
+    test "2::2" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[2::2]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 2, :last, 2}]}
+    end
+
+    test "2:2:" do
+      {:ok, tokens, _} = :jsonpath_lexer.string('$.values[2:2:]')
+
+      assert :jsonpath_parser.parse(tokens) == {:ok, [{:access, "values"}, {:slice, 2, 2, 1}]}
+    end
+  end
 end

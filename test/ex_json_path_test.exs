@@ -512,6 +512,56 @@ defmodule ExJsonPathTest do
     end
   end
 
+  describe "slice operator" do
+    test ~s{eval $.data[0:5]} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[0:5]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [0, -1, 2, -3, 4]}
+    end
+
+    test ~s{eval $.data[:5]} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[:5]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [0, -1, 2, -3, 4]}
+    end
+
+    test ~s{eval $.data[::2]} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[::2]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [0, 2, 4, 6, 8]}
+    end
+
+    test ~s{eval $.data[1::2]} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[1::2]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [-1, -3, -5, -7]}
+    end
+
+    test ~s{eval $.data[1:3]} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[1:3]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [-1, 2]}
+    end
+
+    test ~s{eval $.data[0:2,7:9]} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[0:2,7:9]}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [0, -1, -7, 8]}
+    end
+  end
+
   describe "eval $[?(@.v OPERATOR 1)] expressions" do
     test ~s{with == operator} do
       array = [

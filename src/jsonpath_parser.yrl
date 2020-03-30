@@ -16,8 +16,8 @@
 % limitations under the License.
 %
 
-Nonterminals jsonpath path child index union indexes filter_expression expression value comparison_operator.
-Terminals '.' '..' '*' '$' '[' ']' ',' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
+Nonterminals jsonpath path child index union indexes slice filter_expression expression value comparison_operator.
+Terminals '.' '..' '*' '$' '[' ']' ',' ':' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
 Rootsymbol jsonpath.
 
 jsonpath -> integer : [{access, extract_token('$1')}].
@@ -44,7 +44,22 @@ indexes -> index ',' indexes : ['$1' | '$3'].
 
 index -> integer : {access, extract_token('$1')}.
 index -> string : {access, extract_token('$1')}.
+index -> slice : '$1'.
 index -> filter_expression : {access, '$1'}.
+
+slice -> integer ':' integer ':' integer : {slice, extract_token('$1'), extract_token('$3'), extract_token('$5')}.
+slice -> ':' ':' : {slice, 0, last, 1}.
+slice -> ':' ':' integer : {slice, 0, last, extract_token('$3')}.
+slice -> ':' integer ':' : {slice, 0, extract_token('$2'), 1}.
+slice -> ':' integer ':' integer : {slice, 0, extract_token('$2'), extract_token('$4')}.
+slice -> integer ':' ':' : {slice, extract_token('$1'), last, 1}.
+slice -> integer ':' ':' integer : {slice, extract_token('$1'), last, extract_token('$4')}.
+slice -> integer ':' integer ':' : {slice, extract_token('$1'), extract_token('$3'), 1}.
+
+slice -> integer ':' integer : {slice, extract_token('$1'), extract_token('$3'), 1}.
+slice -> ':' : {slice, 0, last, 1}.
+slice -> ':' integer : {slice, 0, extract_token('$2'), 1}.
+slice -> integer ':' : {slice, extract_token('$1'), last, 1}.
 
 filter_expression -> '?' '(' expression ')' : '$3'.
 

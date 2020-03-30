@@ -31,6 +31,7 @@ defmodule ExJsonPath do
               {:access, path_token()}
               | {:access, {op(), compiled_path(), term()}}
               | {:recurse, path_token()}
+              | {:slice, non_neg_integer(), non_neg_integer(), non_neg_integer()}
               | :wildcard
             )
 
@@ -156,6 +157,16 @@ defmodule ExJsonPath do
 
   defp recurse(_any, [{:recurse, _a} | _t]),
     do: []
+
+  defp recurse(enumerable, [{:slice, first, :last, step} | t]),
+    do: recurse(enumerable, [{:slice, first, Enum.count(enumerable), step} | t])
+
+  defp recurse(enumerable, [{:slice, first, last, step} | t]) do
+    enumerable
+    |> Enum.slice(Range.new(first, last - 1))
+    |> Enum.take_every(step)
+    |> Enum.reduce([], fn item, acc -> acc ++ recurse(item, t) end)
+  end
 
   defp recurse(enumerable, [{:union, union_list} | t]) do
     Enum.reduce(union_list, [], fn union_item, acc ->
