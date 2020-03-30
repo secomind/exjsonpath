@@ -1,5 +1,5 @@
 #
-# This file is part of ExJsonPath.
+# This file is part of ExJSONPath.
 #
 # Copyright 2019,2020 Ispirata Srl
 #
@@ -16,24 +16,24 @@
 # limitations under the License.
 #
 
-defmodule ExJsonPathTest do
+defmodule ExJSONPathTest do
   use ExUnit.Case
-  doctest ExJsonPath
+  doctest ExJSONPath
 
-  alias ExJsonPath.ParsingError
+  alias ExJSONPath.ParsingError
 
   test "eval $.hello.world" do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello.world"
 
-    assert ExJsonPath.eval(map, path) == {:ok, ["test"]}
+    assert ExJSONPath.eval(map, path) == {:ok, ["test"]}
   end
 
   test "eval $.hello.world.this.is.missing doesn't match" do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello.world.this.is.missing"
 
-    assert ExJsonPath.eval(map, path) == {:ok, []}
+    assert ExJSONPath.eval(map, path) == {:ok, []}
   end
 
   # there are two Goessner's implementations, one returns [[]], while the other returns [{}]
@@ -43,21 +43,21 @@ defmodule ExJsonPathTest do
     map = %{"foo" => %{"bar" => %{}}}
     path = "$.foo.bar"
 
-    assert ExJsonPath.eval(map, path) == {:ok, [%{}]}
+    assert ExJSONPath.eval(map, path) == {:ok, [%{}]}
   end
 
   test "eval $.hello[0] on an object doesn't match" do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello[0]"
 
-    assert ExJsonPath.eval(map, path) == {:ok, []}
+    assert ExJSONPath.eval(map, path) == {:ok, []}
   end
 
   test "eval $.hello.world[0] on a string doesn't match" do
     map = %{"hello" => %{"world" => "test"}}
     path = "$.hello.world[0]"
 
-    assert ExJsonPath.eval(map, path) == {:ok, []}
+    assert ExJSONPath.eval(map, path) == {:ok, []}
   end
 
   # goessner's implementation (and others) return [["test"]] here.
@@ -67,14 +67,14 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => ["test"]}}
     path = "$.hello.world"
 
-    assert ExJsonPath.eval(map, path) == {:ok, [["test"]]}
+    assert ExJSONPath.eval(map, path) == {:ok, [["test"]]}
   end
 
   test "eval $.data.values[1] returns an array item" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values[1]"
 
-    assert ExJsonPath.eval(map, path) == {:ok, [-1]}
+    assert ExJSONPath.eval(map, path) == {:ok, [-1]}
   end
 
   # Goessner's implementation supports this syntax.
@@ -83,42 +83,42 @@ defmodule ExJsonPathTest do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values.1"
 
-    assert ExJsonPath.eval(map, path) == {:ok, [-1]}
+    assert ExJSONPath.eval(map, path) == {:ok, [-1]}
   end
 
   test "eval $.data.values[4] which causes an out of bonds access" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values[4]"
 
-    assert ExJsonPath.eval(map, path) == {:ok, []}
+    assert ExJSONPath.eval(map, path) == {:ok, []}
   end
 
   test "eval $.data.missing[0] on missing key doesn't match" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.missing[0]"
 
-    assert ExJsonPath.eval(map, path) == {:ok, []}
+    assert ExJSONPath.eval(map, path) == {:ok, []}
   end
 
   test "eval $.data.values.missing doesn't match" do
     map = %{"data" => %{"values" => [0, -1, 1, -2]}}
     path = "$.data.values.missing"
 
-    assert ExJsonPath.eval(map, path) == {:ok, []}
+    assert ExJSONPath.eval(map, path) == {:ok, []}
   end
 
   test "eval $[0] on array root item" do
     array = [10, 11, 12, 13]
     path = "$[0]"
 
-    assert ExJsonPath.eval(array, path) == {:ok, [10]}
+    assert ExJSONPath.eval(array, path) == {:ok, [10]}
   end
 
   test "eval $.data.values[1].value" do
     map = %{"data" => %{"values" => [%{"value" => 0.1}, %{"value" => 0.2}, %{"value" => 0.3}]}}
     path = "$.data.values[1].value"
 
-    assert ExJsonPath.eval(map, path) == {:ok, [0.2]}
+    assert ExJSONPath.eval(map, path) == {:ok, [0.2]}
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters an array of objects} do
@@ -136,7 +136,7 @@ defmodule ExJsonPathTest do
 
     path = ~s{$.data[0].values[?(@.name == "test")].value}
 
-    assert ExJsonPath.eval(map, path) == {:ok, [0.3]}
+    assert ExJSONPath.eval(map, path) == {:ok, [0.3]}
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters an array with missing keys} do
@@ -156,7 +156,7 @@ defmodule ExJsonPathTest do
 
     path = ~s{$.data[0].values[?(@.name == "test")].value}
 
-    assert ExJsonPath.eval(map, path) == {:ok, [0.0, 0.3]}
+    assert ExJSONPath.eval(map, path) == {:ok, [0.0, 0.3]}
   end
 
   test ~s{eval $.data[0].values[?(@.k == "a")].v filters an objects array with array values} do
@@ -176,7 +176,7 @@ defmodule ExJsonPathTest do
 
     path = ~s{$.data[0].values[?(@.k == "a")].v}
 
-    assert ExJsonPath.eval(map, path) == {:ok, [[0.0], [0.3]]}
+    assert ExJSONPath.eval(map, path) == {:ok, [[0.0], [0.3]]}
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters a map} do
@@ -194,7 +194,7 @@ defmodule ExJsonPathTest do
 
     path = ~s{$.data[0].values[?(@.name == "test")].value}
 
-    assert ExJsonPath.eval(map, path) == {:ok, [0.3]}
+    assert ExJSONPath.eval(map, path) == {:ok, [0.3]}
   end
 
   test ~s{eval $.data[0].values[?(@.name == "test")].value filters a map and returns 2 items} do
@@ -212,7 +212,7 @@ defmodule ExJsonPathTest do
 
     path = ~s{$.data[0].values[?(@.name == "test")].value}
 
-    assert ExJsonPath.eval(map, path) == {:ok, [0.1, 0.3]}
+    assert ExJSONPath.eval(map, path) == {:ok, [0.1, 0.3]}
   end
 
   # This is not described [here](https://goessner.net/articles/JsonPath/)
@@ -221,7 +221,7 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => "test"}}
     path = "hello"
 
-    assert ExJsonPath.eval(map, path) == {:ok, [%{"world" => "test"}]}
+    assert ExJSONPath.eval(map, path) == {:ok, [%{"world" => "test"}]}
   end
 
   # This is not described [here](https://goessner.net/articles/JsonPath/)
@@ -230,7 +230,7 @@ defmodule ExJsonPathTest do
     map = %{"hello" => %{"world" => "test"}}
     path = "hello.world"
 
-    assert ExJsonPath.eval(map, path) == {:ok, ["test"]}
+    assert ExJSONPath.eval(map, path) == {:ok, ["test"]}
   end
 
   # This shortcut is supported by fewer implementations, however I think it must be supported
@@ -241,7 +241,7 @@ defmodule ExJsonPathTest do
     array = [10, 11, 12, 13]
     path = "[3]"
 
-    assert ExJsonPath.eval(array, path) == {:ok, [13]}
+    assert ExJSONPath.eval(array, path) == {:ok, [13]}
   end
 
   # This is supported by Goessner's implementation and some others.
@@ -249,7 +249,7 @@ defmodule ExJsonPathTest do
     array = [10, 11, 12, 13]
     path = "3"
 
-    assert ExJsonPath.eval(array, path) == {:ok, [13]}
+    assert ExJSONPath.eval(array, path) == {:ok, [13]}
   end
 
   # This is supported by Goessner's implementation and some others.
@@ -257,7 +257,7 @@ defmodule ExJsonPathTest do
     array = [%{"name" => "zero"}, %{"name" => "one"}, %{"name" => "two"}]
     path = "1.name"
 
-    assert ExJsonPath.eval(array, path) == {:ok, ["one"]}
+    assert ExJSONPath.eval(array, path) == {:ok, ["one"]}
   end
 
   # The majority of implementations do not support this, however this is a side effect
@@ -269,7 +269,7 @@ defmodule ExJsonPathTest do
     map = %{"key" => 42}
     path = ".key"
 
-    assert ExJsonPath.eval(map, path) == {:ok, [42]}
+    assert ExJSONPath.eval(map, path) == {:ok, [42]}
   end
 
   # This is just supported for consistency reasons, since we already support .key
@@ -277,7 +277,7 @@ defmodule ExJsonPathTest do
     map = [0, 10, 20, 30]
     path = ".1"
 
-    assert ExJsonPath.eval(map, path) == {:ok, [10]}
+    assert ExJSONPath.eval(map, path) == {:ok, [10]}
   end
 
   # Goessner's implementation (and others) do not allow any kind of match on bare values
@@ -285,7 +285,7 @@ defmodule ExJsonPathTest do
     value = 5
     path = "$.test"
 
-    assert ExJsonPath.eval(value, path) == {:ok, []}
+    assert ExJSONPath.eval(value, path) == {:ok, []}
   end
 
   # Goessner's implementation (and others) do not allow any kind of match on bare values
@@ -293,7 +293,7 @@ defmodule ExJsonPathTest do
     value = true
     path = "$[0]"
 
-    assert ExJsonPath.eval(value, path) == {:ok, []}
+    assert ExJSONPath.eval(value, path) == {:ok, []}
   end
 
   describe ".. operator" do
@@ -317,7 +317,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..a}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [0, 1, 2, 3, 4]}
+      assert ExJSONPath.eval(map, path) == {:ok, [0, 1, 2, 3, 4]}
     end
 
     test "eval $..missing on a nested object" do
@@ -340,14 +340,14 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..missing}
 
-      assert ExJsonPath.eval(map, path) == {:ok, []}
+      assert ExJSONPath.eval(map, path) == {:ok, []}
     end
 
     test "eval $..b on a nested object" do
       map = %{"a" => 0, "b" => %{"a" => 1, "b" => %{"a" => 2, "b" => %{}}}}
       path = ~s{$..b}
 
-      assert ExJsonPath.eval(map, path) ==
+      assert ExJSONPath.eval(map, path) ==
                {:ok, [%{"a" => 1, "b" => %{"a" => 2, "b" => %{}}}, %{"a" => 2, "b" => %{}}, %{}]}
     end
 
@@ -356,7 +356,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..k}
 
-      assert ExJsonPath.eval(array, path) == {:ok, ["a", "c", "b"]}
+      assert ExJSONPath.eval(array, path) == {:ok, ["a", "c", "b"]}
     end
 
     test "eval $..k on an empty array" do
@@ -364,7 +364,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..k}
 
-      assert ExJsonPath.eval(array, path) == {:ok, []}
+      assert ExJSONPath.eval(array, path) == {:ok, []}
     end
 
     test "eval $..k on an empty object" do
@@ -372,7 +372,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..k}
 
-      assert ExJsonPath.eval(map, path) == {:ok, []}
+      assert ExJSONPath.eval(map, path) == {:ok, []}
     end
 
     test "eval $..2" do
@@ -383,7 +383,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..2}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [2, "6", []]}
+      assert ExJSONPath.eval(map, path) == {:ok, [2, "6", []]}
     end
 
     test "eval $..2 on a nested array" do
@@ -391,7 +391,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..2}
 
-      assert ExJsonPath.eval(array, path) == {:ok, [[5, 6, [7, 8, 9]], [7, 8, 9], 9]}
+      assert ExJSONPath.eval(array, path) == {:ok, [[5, 6, [7, 8, 9]], [7, 8, 9], 9]}
     end
 
     test "eval $..1.x on a nested array" do
@@ -399,7 +399,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..1.x}
 
-      assert ExJsonPath.eval(array, path) == {:ok, ["computer"]}
+      assert ExJSONPath.eval(array, path) == {:ok, ["computer"]}
     end
 
     test "eval $..1.x on a nested array with an array leaf" do
@@ -407,7 +407,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$..1.x}
 
-      assert ExJsonPath.eval(array, path) == {:ok, [["test", -1]]}
+      assert ExJSONPath.eval(array, path) == {:ok, [["test", -1]]}
     end
   end
 
@@ -417,7 +417,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.*}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [%{"values" => [0, -1, 1, -2]}]}
+      assert ExJSONPath.eval(map, path) == {:ok, [%{"values" => [0, -1, 1, -2]}]}
     end
 
     test "eval $.*.values.* on an object" do
@@ -425,7 +425,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.*.values.*}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [%{"a" => 1}, %{"b" => 2}]}
+      assert ExJSONPath.eval(map, path) == {:ok, [%{"a" => 1}, %{"b" => 2}]}
     end
 
     test "eval $.* on an array" do
@@ -433,7 +433,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.*}
 
-      assert ExJsonPath.eval(array, path) == {:ok, [%{"a" => 1}, %{"b" => 2}]}
+      assert ExJSONPath.eval(array, path) == {:ok, [%{"a" => 1}, %{"b" => 2}]}
     end
 
     test "eval $.*.*.* on an array" do
@@ -441,7 +441,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.*.*.*}
 
-      assert ExJsonPath.eval(array, path) == {:ok, [1, -1, -2, -3, 0]}
+      assert ExJSONPath.eval(array, path) == {:ok, [1, -1, -2, -3, 0]}
     end
   end
 
@@ -451,7 +451,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.test["a","b","c"]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [4, "hello", 2]}
+      assert ExJSONPath.eval(map, path) == {:ok, [4, "hello", 2]}
     end
 
     test ~s{eval $.test["c","b","a"]} do
@@ -459,7 +459,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.test["c","b","a"]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [2, "hello", 4]}
+      assert ExJSONPath.eval(map, path) == {:ok, [2, "hello", 4]}
     end
 
     test ~s{eval $.test["c","c","a"]} do
@@ -467,7 +467,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.test["c","c","a"]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [2, 2, 4]}
+      assert ExJSONPath.eval(map, path) == {:ok, [2, 2, 4]}
     end
 
     test ~s{eval $.test[4,2,0]} do
@@ -475,7 +475,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.test[4,2,0]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, ["4", "2", "0"]}
+      assert ExJSONPath.eval(map, path) == {:ok, ["4", "2", "0"]}
     end
 
     test ~s{eval $.test[0,0,?(@.a == "ok")]} do
@@ -483,7 +483,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.test[0,0,?(@.a == "ok")]}
 
-      assert ExJsonPath.eval(map, path) ==
+      assert ExJSONPath.eval(map, path) ==
                {:ok, [%{"b" => "test"}, %{"b" => "test"}, %{"a" => "ok"}]}
     end
 
@@ -492,7 +492,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.test[0,100,?(@.a == "ok")]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [%{"b" => "test"}, %{"a" => "ok"}]}
+      assert ExJSONPath.eval(map, path) == {:ok, [%{"b" => "test"}, %{"a" => "ok"}]}
     end
 
     test ~s{eval $.test[0,0,?(@.a == "ok")].a} do
@@ -500,7 +500,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.test[0,0,?(@.a == "ok")].a}
 
-      assert ExJsonPath.eval(map, path) == {:ok, ["ok"]}
+      assert ExJSONPath.eval(map, path) == {:ok, ["ok"]}
     end
 
     test ~s{eval $.test[0,0,?(@.a == "ok")].z} do
@@ -508,7 +508,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.test[0,0,?(@.a == "ok")].z}
 
-      assert ExJsonPath.eval(map, path) == {:ok, []}
+      assert ExJSONPath.eval(map, path) == {:ok, []}
     end
   end
 
@@ -518,7 +518,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.data[0:5]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [0, -1, 2, -3, 4]}
+      assert ExJSONPath.eval(map, path) == {:ok, [0, -1, 2, -3, 4]}
     end
 
     test ~s{eval $.data[:5]} do
@@ -526,7 +526,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.data[:5]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [0, -1, 2, -3, 4]}
+      assert ExJSONPath.eval(map, path) == {:ok, [0, -1, 2, -3, 4]}
     end
 
     test ~s{eval $.data[::2]} do
@@ -534,7 +534,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.data[::2]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [0, 2, 4, 6, 8]}
+      assert ExJSONPath.eval(map, path) == {:ok, [0, 2, 4, 6, 8]}
     end
 
     test ~s{eval $.data[1::2]} do
@@ -542,7 +542,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.data[1::2]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [-1, -3, -5, -7]}
+      assert ExJSONPath.eval(map, path) == {:ok, [-1, -3, -5, -7]}
     end
 
     test ~s{eval $.data[1:3]} do
@@ -550,7 +550,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.data[1:3]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [-1, 2]}
+      assert ExJSONPath.eval(map, path) == {:ok, [-1, 2]}
     end
 
     test ~s{eval $.data[0:2,7:9]} do
@@ -558,7 +558,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$.data[0:2,7:9]}
 
-      assert ExJsonPath.eval(map, path) == {:ok, [0, -1, -7, 8]}
+      assert ExJSONPath.eval(map, path) == {:ok, [0, -1, -7, 8]}
     end
   end
 
@@ -573,7 +573,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$[?(@.v == 1)]}
 
-      assert ExJsonPath.eval(array, path) ==
+      assert ExJSONPath.eval(array, path) ==
                {:ok, [%{"k" => "b", "v" => 1}, %{"k" => "c", "v" => 1}]}
     end
 
@@ -587,7 +587,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$[?(@.v != 1)]}
 
-      assert ExJsonPath.eval(array, path) ==
+      assert ExJSONPath.eval(array, path) ==
                {:ok, [%{"k" => "a", "v" => 0}, %{"k" => "d", "v" => 0}]}
     end
 
@@ -601,7 +601,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$[?(@.v > 1)]}
 
-      assert ExJsonPath.eval(array, path) == {:ok, [%{"k" => "c", "v" => 2}]}
+      assert ExJSONPath.eval(array, path) == {:ok, [%{"k" => "c", "v" => 2}]}
     end
 
     test ~s{with >= operator} do
@@ -614,7 +614,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$[?(@.v >= 1)]}
 
-      assert ExJsonPath.eval(array, path) ==
+      assert ExJSONPath.eval(array, path) ==
                {:ok, [%{"k" => "b", "v" => 1}, %{"k" => "c", "v" => 2}]}
     end
 
@@ -628,7 +628,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$[?(@.v < 1)]}
 
-      assert ExJsonPath.eval(array, path) ==
+      assert ExJSONPath.eval(array, path) ==
                {:ok, [%{"k" => "a", "v" => 0}, %{"k" => "d", "v" => 0}]}
     end
 
@@ -642,7 +642,7 @@ defmodule ExJsonPathTest do
 
       path = ~s{$[?(@.v <= 2)]}
 
-      assert ExJsonPath.eval(array, path) ==
+      assert ExJSONPath.eval(array, path) ==
                {:ok, [%{"v" => 1, "k" => "a"}, %{"k" => "b", "v" => 2}, %{"k" => "d", "v" => 0}]}
     end
   end
@@ -652,28 +652,28 @@ defmodule ExJsonPathTest do
       map = %{"a" => %{"b" => 42}}
       path = ~s{$}
 
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(map, path)
     end
 
     test ~s{with eval @} do
       map = %{"a" => %{"b" => 42}}
       path = ~s{@}
 
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(map, path)
     end
 
     test "with invalid expression" do
       map = %{"a" => %{"b" => 42}}
       path = ~s{$[?()]}
 
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(map, path)
     end
 
     test "with unmatched parenthesis" do
       map = %{"a" => %{"b" => 42}}
       path = ~s{$[?(@.v <= 2]}
 
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(map, path)
     end
 
     test "with invalid operator" do
@@ -681,14 +681,14 @@ defmodule ExJsonPathTest do
 
       path = ~s{$[?(@.v # 2)]}
 
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(array, path)
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(array, path)
     end
 
     test "with unexpected chars" do
       map = %{"a" => %{"b" => 42}}
       path = ~s{ùùù}
 
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJsonPath.eval(map, path)
+      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(map, path)
     end
   end
 end

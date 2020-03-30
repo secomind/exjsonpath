@@ -1,5 +1,5 @@
 #
-# This file is part of ExJsonPath.
+# This file is part of ExJSONPath.
 #
 # Copyright 2019,2020 Ispirata Srl
 #
@@ -16,12 +16,12 @@
 # limitations under the License.
 #
 
-defmodule ExJsonPath do
+defmodule ExJSONPath do
   @moduledoc """
   This module implements a JSONPath evaluator.
   """
 
-  alias ExJsonPath.ParsingError
+  alias ExJSONPath.ParsingError
 
   @opaque path_token :: String.t() | pos_integer()
   @opaque op :: :> | :>= | :< | :<= | :== | :!=
@@ -38,17 +38,17 @@ defmodule ExJsonPath do
   @doc """
   Evaluate JSONPath on given input.
 
-  Returns `{:ok, [result1 | results]}` on success, {:error, %ExJsonPath.ParsingError{}} otherwise.
+  Returns `{:ok, [result1 | results]}` on success, {:error, %ExJSONPath.ParsingError{}} otherwise.
 
   ## Examples
 
-    iex> ExJsonPath.eval(%{"a" => %{"b" => 42}}, "$.a.b")
+    iex> ExJSONPath.eval(%{"a" => %{"b" => 42}}, "$.a.b")
     {:ok, [42]}
 
-    iex> ExJsonPath.eval([%{"v" => 1}, %{"v" => 2}, %{"v" => 3}], "$[?(@.v > 1)].v")
+    iex> ExJSONPath.eval([%{"v" => 1}, %{"v" => 2}, %{"v" => 3}], "$[?(@.v > 1)].v")
     {:ok, [2, 3]}
 
-    iex> ExJsonPath.eval(%{"a" => %{"b" => 42}}, "$.x.y")
+    iex> ExJSONPath.eval(%{"a" => %{"b" => 42}}, "$.x.y")
     {:ok, []}
   """
   @spec eval(term(), String.t() | compiled_path()) ::
