@@ -411,6 +411,40 @@ defmodule ExJsonPathTest do
     end
   end
 
+  describe "wildcard operator" do
+    test "eval $.*" do
+      map = %{"data" => %{"values" => [0, -1, 1, -2]}}
+
+      path = ~s{$.*}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [%{"values" => [0, -1, 1, -2]}]}
+    end
+
+    test "eval $.*.values.* on an object" do
+      map = %{"data" => %{"values" => [%{"a" => 1}, %{"b" => 2}]}}
+
+      path = ~s{$.*.values.*}
+
+      assert ExJsonPath.eval(map, path) == {:ok, [%{"a" => 1}, %{"b" => 2}]}
+    end
+
+    test "eval $.* on an array" do
+      array = [%{"a" => 1}, %{"b" => 2}]
+
+      path = ~s{$.*}
+
+      assert ExJsonPath.eval(array, path) == {:ok, [%{"a" => 1}, %{"b" => 2}]}
+    end
+
+    test "eval $.*.*.* on an array" do
+      array = [%{"a" => %{"x" => 1, "y" => -1}}, %{"b" => %{"x" => -2, "y" => -3, "z" => 0}}]
+
+      path = ~s{$.*.*.*}
+
+      assert ExJsonPath.eval(array, path) == {:ok, [1, -1, -2, -3, 0]}
+    end
+  end
+
   describe "eval $[?(@.v OPERATOR 1)] expressions" do
     test ~s{with == operator} do
       array = [
