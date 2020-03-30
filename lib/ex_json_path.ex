@@ -157,6 +157,12 @@ defmodule ExJsonPath do
   defp recurse(_any, [{:recurse, _a} | _t]),
     do: []
 
+  defp recurse(enumerable, [{:union, union_list} | t]) do
+    Enum.reduce(union_list, [], fn union_item, acc ->
+      acc ++ recurse(enumerable, [union_item | t])
+    end)
+  end
+
   defp recurse(%{} = map, [:wildcard | t]) do
     Map.values(map)
     |> Enum.reduce([], fn item, acc -> acc ++ recurse(item, t) end)

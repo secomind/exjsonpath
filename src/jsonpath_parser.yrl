@@ -16,8 +16,8 @@
 % limitations under the License.
 %
 
-Nonterminals jsonpath path child index filter_expression expression value comparison_operator.
-Terminals '.' '..' '*' '$' '[' ']' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
+Nonterminals jsonpath path child index union indexes filter_expression expression value comparison_operator.
+Terminals '.' '..' '*' '$' '[' ']' ',' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
 Rootsymbol jsonpath.
 
 jsonpath -> integer : [{access, extract_token('$1')}].
@@ -35,11 +35,16 @@ child -> '..' integer : [{recurse, extract_token('$2')}].
 child -> '.' '*' : [wildcard].
 child -> '.' identifier : [{access, extract_token('$2')}].
 child -> '.' integer : [{access, extract_token('$2')}].
-child -> '[' index ']' : '$2'.
+child -> '[' index ']' : ['$2'].
+child -> '[' union ']' : ['$2'].
 
-index -> integer : [{access, extract_token('$1')}].
-index -> string : [{access, extract_token('$1')}].
-index -> filter_expression : [{access, '$1'}].
+union -> indexes: {union,  '$1'}.
+indexes -> index ',' index : ['$1', '$3'].
+indexes -> index ',' indexes : ['$1' | '$3'].
+
+index -> integer : {access, extract_token('$1')}.
+index -> string : {access, extract_token('$1')}.
+index -> filter_expression : {access, '$1'}.
 
 filter_expression -> '?' '(' expression ')' : '$3'.
 
