@@ -296,6 +296,15 @@ defmodule ExJSONPathTest do
     assert ExJSONPath.eval(value, path) == {:ok, []}
   end
 
+  # Goessner was not supporting this, however this is handy and supported by most implementations
+  # https://cburgmer.github.io/json-path-comparison/results/root.html
+  test "eval $" do
+    map = %{"a" => %{"b" => 42}}
+    path = ~s{$}
+
+    assert ExJSONPath.eval(map, path) == {:ok, [map]}
+  end
+
   describe ".. operator" do
     test "eval $..a on a nested object" do
       map = %{
@@ -648,13 +657,6 @@ defmodule ExJSONPathTest do
   end
 
   describe "parsing error" do
-    test ~s{with eval $} do
-      map = %{"a" => %{"b" => 42}}
-      path = ~s{$}
-
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(map, path)
-    end
-
     test ~s{with eval @} do
       map = %{"a" => %{"b" => 42}}
       path = ~s{@}
