@@ -161,6 +161,9 @@ defmodule ExJSONPath do
   defp recurse(enumerable, [{:slice, first, :last, step} | t]),
     do: recurse(enumerable, [{:slice, first, Enum.count(enumerable), step} | t])
 
+  defp recurse(_enumerable, [{:slice, index, index, _step} | _t]),
+    do: []
+
   defp recurse(enumerable, [{:slice, first, last, step} | t]) do
     enumerable
     |> Enum.slice(Range.new(first, last - 1))
