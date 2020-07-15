@@ -521,6 +521,40 @@ defmodule ExJSONPathTest do
       assert ExJSONPath.eval(map, path) == {:ok, [0, -1, 2, -3, 4]}
     end
 
+    # https://cburgmer.github.io/json-path-comparison/results/array_slice_with_range_of_0.html
+    test ~s{eval $.data[0:0] does not return results} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[0:0]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test ~s{eval $.data[5:5] does not return results} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[5:5]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test ~s{eval $.data[0:1]} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[0:1]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, [0]}
+    end
+
+    # https://cburgmer.github.io/json-path-comparison/results/array_slice_with_range_of_-1.html
+    test ~s{eval $.data[5:1]} do
+      map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
+
+      path = ~s{$.data[5:1]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
     test ~s{eval $.data[:5]} do
       map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
 
