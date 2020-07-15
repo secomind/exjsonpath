@@ -719,12 +719,5 @@ defmodule ExJSONPathTest do
 
       assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(array, path)
     end
-
-    test "with unexpected chars" do
-      map = %{"a" => %{"b" => 42}}
-      path = ~s{ùùù}
-
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(map, path)
-    end
   end
 end
