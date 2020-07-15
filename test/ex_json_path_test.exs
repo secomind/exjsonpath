@@ -429,6 +429,14 @@ defmodule ExJSONPathTest do
       assert ExJSONPath.eval(map, path) == {:ok, [%{"values" => [0, -1, 1, -2]}]}
     end
 
+    test "eval $[*]" do
+      map = %{"data" => %{"values" => [0, -1, 1, -2]}}
+
+      path = ~s{$[*]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, [%{"values" => [0, -1, 1, -2]}]}
+    end
+
     test "eval $.*.values.* on an object" do
       map = %{"data" => %{"values" => [%{"a" => 1}, %{"b" => 2}]}}
 
