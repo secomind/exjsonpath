@@ -158,6 +158,9 @@ defmodule ExJSONPath do
   defp recurse(_any, [{:recurse, _a} | _t]),
     do: []
 
+  defp recurse(map, [{:slice, _first, _last, _step} | _t]) when is_map(map),
+    do: []
+
   defp recurse(enumerable, [{:slice, first, :last, step} | t]),
     do: recurse(enumerable, [{:slice, first, Enum.count(enumerable), step} | t])
 

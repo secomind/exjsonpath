@@ -603,6 +603,22 @@ defmodule ExJSONPathTest do
 
       assert ExJSONPath.eval(map, path) == {:ok, [0, -1, -7, 8]}
     end
+
+    test ~s{eval $.data[1:3] on object} do
+      map = %{"data" => %{"a" => 0, "b" => -1, "c" => 2, "d" => -3, "e" => 4}}
+
+      path = ~s{$.data[1:3]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test ~s{eval $.data[1:3:2] on object} do
+      map = %{"data" => %{"a" => 0, "b" => -1, "c" => 2, "d" => -3, "e" => 4}}
+
+      path = ~s{$.data[1:3:2]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
   end
 
   describe "eval $[?(@.v OPERATOR 1)] expressions" do
