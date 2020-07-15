@@ -360,6 +360,14 @@ defmodule ExJSONPathTest do
                {:ok, [%{"a" => 1, "b" => %{"a" => 2, "b" => %{}}}, %{"a" => 2, "b" => %{}}, %{}]}
     end
 
+    test ~s{eval $..["b"] on a nested object} do
+      map = %{"a" => 0, "b" => %{"a" => 1, "b" => %{"a" => 2, "b" => %{}}}}
+      path = ~s{$..b}
+
+      assert ExJSONPath.eval(map, path) ==
+               {:ok, [%{"a" => 1, "b" => %{"a" => 2, "b" => %{}}}, %{"a" => 2, "b" => %{}}, %{}]}
+    end
+
     test "eval $..k on an array" do
       array = [%{"k" => "a"}, %{"k" => "c"}, %{"k" => "b"}]
 
@@ -382,6 +390,17 @@ defmodule ExJSONPathTest do
       path = ~s{$..k}
 
       assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test "eval $..[2]" do
+      map = %{
+        "a" => [0, 1, 2],
+        "b" => %{"c" => [3], "d" => [4, 5, "6"], "e" => %{"f" => [7, 8, [], 10]}}
+      }
+
+      path = ~s{$..[2]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, [2, "6", []]}
     end
 
     test "eval $..2" do
