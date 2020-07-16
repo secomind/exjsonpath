@@ -33,6 +33,8 @@ path -> path child : '$1' ++ '$2'.
 
 child -> '..' identifier : [{recurse, extract_token('$2')}].
 child -> '..' integer : [{recurse, extract_token('$2')}].
+child -> '..' '[' string ']' : [{recurse, extract_token('$3')}].
+child -> '..' '[' integer ']' : [{recurse, extract_token('$3')}].
 child -> '.' '*' : [wildcard].
 child -> '.' identifier : [{access, extract_token('$2')}].
 child -> '.' integer : [{access, extract_token('$2')}].
