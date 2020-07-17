@@ -583,6 +583,15 @@ defmodule ExJSONPathTest do
       assert ExJSONPath.eval(map, path) == {:ok, []}
     end
 
+    # https://cburgmer.github.io/json-path-comparison/results/array_slice_with_start_large_negative_number_and_open_end_on_short_array.html
+    test ~s{eval $.data[-4:]} do
+      map = %{"data" => [1, 2, 3]}
+
+      path = ~s{$.data[-4:]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, [1, 2, 3]}
+    end
+
     test ~s{eval $.data[-3:]} do
       map = %{"data" => ["a", "b", "c"]}
 
