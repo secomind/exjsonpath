@@ -38,6 +38,7 @@ child -> '..' '[' integer ']' : [{recurse, extract_token('$3')}].
 child -> '.' '*' : [wildcard].
 child -> '.' identifier : [{access, extract_token('$2')}].
 child -> '.' integer : [{access, extract_token('$2')}].
+child -> '[' '*' ']' : [wildcard].
 child -> '[' index ']' : ['$2'].
 child -> '[' union ']' : ['$2'].
 
