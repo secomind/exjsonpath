@@ -21,14 +21,14 @@ end
 ## Basic Usage
 
 ```elixir
-iex(1)> ExJsonPath.eval([%{"v" => 1}, %{"v" => 2}, %{"v" => 3}], "$[?(@.v > 1)].v")
+iex(1)> ExJSONPath.eval([%{"v" => 1}, %{"v" => 2}, %{"v" => 3}], "$[?(@.v > 1)].v")
 {:ok, [2, 3]}
 ```
 
 ```elixir
 iex(1)> {:ok, json} = File.read("store.json")
 iex(2)> {:ok, store} = Jason.decode(json)
-iex(3)> ExJsonPath.eval(store, "$.store.book[?(@.price > 20)].title")
+iex(3)> ExJSONPath.eval(store, "$.store.book[?(@.price > 20)].title")
 {:ok, ["The Lord of the Rings"]}
 ```
 

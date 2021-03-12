@@ -39,7 +39,7 @@ jobs:
         key: ${{ runner.os }}-_build-${{ matrix.otp_version }}-${{ matrix.elixir_version }}-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-_build-${{ matrix.otp_version }}-${{ matrix.elixir_version }}-${{ github.sha }}
-    - uses: actions/setup-elixir@v1.2.0
+    - uses: erlef/setup-elixir@v1.6.0
       with:
         otp-version: ${{ matrix.otp_version }}
         elixir-version: ${{ matrix.elixir_version }}
