@@ -98,6 +98,12 @@ defmodule ExJSONPath do
   defp recurse(item, []),
     do: [item]
 
+  defp recurse(item, [:root | t]),
+    do: recurse(item, t)
+
+  defp recurse(item, [:current_item | t]),
+    do: recurse(item, t)
+
   defp recurse(enumerable, [{:access, {op, path, value}} | t])
        when is_list(enumerable) or is_map(enumerable) do
     results =

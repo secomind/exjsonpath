@@ -25,8 +25,10 @@ jsonpath -> identifier : [{access, extract_token('$1')}].
 jsonpath -> child : '$1'.
 jsonpath -> integer path : [{access, extract_token('$1')} | '$2'].
 jsonpath -> identifier path : [{access, extract_token('$1')} | '$2'].
-jsonpath -> '$' : [].
-jsonpath -> '$' path : '$2'.
+jsonpath -> '$' : [root].
+jsonpath -> '$' path : [root | '$2'].
+jsonpath -> '@' : [current_item].
+jsonpath -> '@' path : [current_item | '$2'].
 
 path -> child : '$1'.
 path -> path child : '$1' ++ '$2'.
