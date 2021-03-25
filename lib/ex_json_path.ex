@@ -53,16 +53,41 @@ defmodule ExJSONPath do
   """
   @spec eval(term(), String.t() | compiled_path()) ::
           {:ok, list(term())} | {:error, ParsingError.t()}
-  def eval(input, jsonpath)
+  def eval(input, jsonpath),
+    do: eval(input, input, jsonpath)
 
-  def eval(input, path) when is_binary(path) do
+  @spec eval(term(), term(), String.t() | compiled_path()) ::
+          {:ok, list(term())} | {:error, ParsingError.t()}
+  def eval(root, input, jsonpath)
+
+  @doc """
+  Evaluate JSONPath on given input.
+
+  `$` will select document `root`, while `@` will select item.
+  Returns `{:ok, [result1 | results]}` on success, {:error, %ExJSONPath.ParsingError{}} otherwise.
+
+  ## Examples
+
+    iex> map = %{"a" => %{"b" => 42}}
+    iex> ExJSONPath.eval(map, map["a"], "@.b")
+    {:ok, [42]}
+
+    iex> map = %{"a" => %{"b" => 42}}
+    iex> ExJSONPath.eval(map, map["a"], "$.a.b")
+    {:ok, [42]}
+
+    iex> map = %{"a" => %{"b" => 42}}
+    iex> ExJSONPath.eval(map, map["a"], "b")
+    {:ok, [42]}
+  """
+  def eval(root, input, path) when is_binary(path) do
     with {:ok, compiled} <- compile(path) do
-      eval(input, compiled)
+      eval(root, input, compiled)
     end
   end
 
-  def eval(input, compiled_path) when is_list(compiled_path) do
-    {:ok, recurse(input, input, compiled_path)}
+  def eval(root, input, compiled_path) when is_list(compiled_path) do
+    {:ok, recurse(root, input, compiled_path)}
   end
 
   @doc """
@@ -98,8 +123,8 @@ defmodule ExJSONPath do
   defp recurse(_root, item, []),
     do: [item]
 
-  defp recurse(root, item, [:root | t]),
-    do: recurse(root, item, t)
+  defp recurse(root, _item, [:root | t]),
+    do: recurse(root, root, t)
 
   defp recurse(root, item, [:current_item | t]),
     do: recurse(root, item, t)
