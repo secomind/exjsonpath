@@ -733,14 +733,17 @@ defmodule ExJSONPathTest do
     end
   end
 
-  describe "parsing error" do
-    test ~s{with eval @} do
-      map = %{"a" => %{"b" => 42}}
-      path = ~s{@}
+  describe "relative paths" do
+    test "simple relative path with leading @" do
+      map = %{"a" => "test"}
 
-      assert {:error, %ParsingError{message: "" <> _msg}} = ExJSONPath.eval(map, path)
+      path = "@.a"
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["test"]}
     end
+  end
 
+  describe "parsing error" do
     test "with invalid expression" do
       map = %{"a" => %{"b" => 42}}
       path = ~s{$[?()]}

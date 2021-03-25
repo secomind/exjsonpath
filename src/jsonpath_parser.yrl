@@ -16,7 +16,7 @@
 % limitations under the License.
 %
 
-Nonterminals jsonpath path child index union indexes slice filter_expression expression value comparison_operator.
+Nonterminals jsonpath start_selector path child index union indexes slice filter_expression expression value comparison_operator.
 Terminals '.' '..' '*' '$' '[' ']' ',' ':' '@' '?' '(' ')' '>' '>=' '<' '<=' '==' '!=' identifier integer string.
 Rootsymbol jsonpath.
 
@@ -25,8 +25,11 @@ jsonpath -> identifier : [{access, extract_token('$1')}].
 jsonpath -> child : '$1'.
 jsonpath -> integer path : [{access, extract_token('$1')} | '$2'].
 jsonpath -> identifier path : [{access, extract_token('$1')} | '$2'].
-jsonpath -> '$' : [].
-jsonpath -> '$' path : '$2'.
+jsonpath -> start_selector : ['$1'].
+jsonpath -> start_selector path : ['$1' | '$2'].
+
+start_selector -> '$' : root.
+start_selector -> '@' : current_item.
 
 path -> child : '$1'.
 path -> path child : '$1' ++ '$2'.

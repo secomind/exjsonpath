@@ -34,6 +34,11 @@ iex(3)> ExJSONPath.eval(store, "$.store.book[?(@.price > 20)].title")
 
 Full documentation can be found at [hexdocs.pm/exjsonpath](https://hexdocs.pm/exjsonpath).
 
+## Notes
+
+Expressions with no leading selector (`$` or `@`) default to current item, however they are a
+common extension to JSONPath that should be avoided for compatibility reasons.
+
 ## About This Project
 
 This project has been created in order to provide support to JSONPath to [Astarte Flow](https://github.com/astarte-platform/astarte_flow).
