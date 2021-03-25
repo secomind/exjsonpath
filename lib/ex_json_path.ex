@@ -62,7 +62,7 @@ defmodule ExJSONPath do
   end
 
   def eval(input, compiled_path) when is_list(compiled_path) do
-    {:ok, recurse(input, compiled_path)}
+    {:ok, recurse(input, input, compiled_path)}
   end
 
   @doc """
@@ -95,16 +95,16 @@ defmodule ExJSONPath do
     end
   end
 
-  defp recurse(item, []),
+  defp recurse(_root, item, []),
     do: [item]
 
-  defp recurse(item, [:root | t]),
-    do: recurse(item, t)
+  defp recurse(root, item, [:root | t]),
+    do: recurse(root, item, t)
 
-  defp recurse(item, [:current_item | t]),
-    do: recurse(item, t)
+  defp recurse(root, item, [:current_item | t]),
+    do: recurse(root, item, t)
 
-  defp recurse(enumerable, [{:access, {op, path, value}} | t])
+  defp recurse(root, enumerable, [{:access, {op, path, value}} | t])
        when is_list(enumerable) or is_map(enumerable) do
     results =
       Enum.reduce(enumerable, [], fn entry, acc ->
@@ -114,9 +114,9 @@ defmodule ExJSONPath do
             value -> value
           end
 
-        with [value_at_path] <- recurse(item, path),
+        with [value_at_path] <- recurse(root, item, path),
              true <- compare(op, value_at_path, value),
-             [leaf_value] <- recurse(item, t) do
+             [leaf_value] <- recurse(root, item, t) do
           [leaf_value | acc]
         else
           [] -> acc
@@ -127,72 +127,72 @@ defmodule ExJSONPath do
     Enum.reverse(results)
   end
 
-  defp recurse(map, [{:access, a} | t]) when is_map(map) do
+  defp recurse(root, map, [{:access, a} | t]) when is_map(map) do
     case Map.fetch(map, a) do
-      {:ok, next_item} -> recurse(next_item, t)
+      {:ok, next_item} -> recurse(root, next_item, t)
       :error -> []
     end
   end
 
-  defp recurse(array, [{:access, a} | t]) when is_list(array) and is_integer(a) do
+  defp recurse(root, array, [{:access, a} | t]) when is_list(array) and is_integer(a) do
     case Enum.fetch(array, a) do
-      {:ok, next_item} -> recurse(next_item, t)
+      {:ok, next_item} -> recurse(root, next_item, t)
       :error -> []
     end
   end
 
-  defp recurse(_any, [{:access, _a} | _t]),
+  defp recurse(_root, _any, [{:access, _a} | _t]),
     do: []
 
-  defp recurse(enumerable, [{:recurse, a} | t] = path)
+  defp recurse(root, enumerable, [{:recurse, a} | t] = path)
        when is_map(enumerable) or is_list(enumerable) do
     descent_results =
       Enum.reduce(enumerable, [], fn
         {_key, item}, acc ->
-          acc ++ recurse(item, path)
+          acc ++ recurse(root, item, path)
 
         item, acc ->
-          acc ++ recurse(item, path)
+          acc ++ recurse(root, item, path)
       end)
 
     case safe_fetch(enumerable, a) do
-      {:ok, item} -> recurse(item, t) ++ descent_results
+      {:ok, item} -> recurse(root, item, t) ++ descent_results
       :error -> descent_results
     end
   end
 
-  defp recurse(_any, [{:recurse, _a} | _t]),
+  defp recurse(_root, _any, [{:recurse, _a} | _t]),
     do: []
 
-  defp recurse(map, [{:slice, _first, _last, _step} | _t]) when is_map(map),
+  defp recurse(_root, map, [{:slice, _first, _last, _step} | _t]) when is_map(map),
     do: []
 
-  defp recurse(enumerable, [{:slice, first, :last, step} | t]),
-    do: recurse(enumerable, [{:slice, first, Enum.count(enumerable), step} | t])
+  defp recurse(root, enumerable, [{:slice, first, :last, step} | t]),
+    do: recurse(root, enumerable, [{:slice, first, Enum.count(enumerable), step} | t])
 
-  defp recurse(_enumerable, [{:slice, index, index, _step} | _t]),
+  defp recurse(_root, _enumerable, [{:slice, index, index, _step} | _t]),
     do: []
 
-  defp recurse(enumerable, [{:slice, first, last, step} | t]) do
+  defp recurse(root, enumerable, [{:slice, first, last, step} | t]) do
     enumerable
     |> Enum.slice(Range.new(first, last - 1))
     |> Enum.take_every(step)
-    |> Enum.reduce([], fn item, acc -> acc ++ recurse(item, t) end)
+    |> Enum.reduce([], fn item, acc -> acc ++ recurse(root, item, t) end)
   end
 
-  defp recurse(enumerable, [{:union, union_list} | t]) do
+  defp recurse(root, enumerable, [{:union, union_list} | t]) do
     Enum.reduce(union_list, [], fn union_item, acc ->
-      acc ++ recurse(enumerable, [union_item | t])
+      acc ++ recurse(root, enumerable, [union_item | t])
     end)
   end
 
-  defp recurse(%{} = map, [:wildcard | t]) do
+  defp recurse(root, %{} = map, [:wildcard | t]) do
     Map.values(map)
-    |> Enum.reduce([], fn item, acc -> acc ++ recurse(item, t) end)
+    |> Enum.reduce([], fn item, acc -> acc ++ recurse(root, item, t) end)
   end
 
-  defp recurse(list, [:wildcard | t]) when is_list(list) do
-    Enum.reduce(list, [], fn item, acc -> acc ++ recurse(item, t) end)
+  defp recurse(root, list, [:wildcard | t]) when is_list(list) do
+    Enum.reduce(list, [], fn item, acc -> acc ++ recurse(root, item, t) end)
   end
 
   defp safe_fetch(list, index) when is_list(list) and is_integer(index),
