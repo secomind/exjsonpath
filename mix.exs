@@ -1,7 +1,7 @@
 #
 # This file is part of ExJsonPath.
 #
-# Copyright 2019,2020 Ispirata Srl
+# Copyright 2019-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ defmodule ExJsonPath.MixProject do
       maintainers: ["Davide Bettio"],
       licenses: ["Apache-2.0"],
       links: %{
-        "GitHub" => "https://github.com/ispirata/exjsonpath",
+        "GitHub" => "https://github.com/secomind/exjsonpath",
         "Documentation" => "http://hexdocs.pm/exjsonpath"
       }
     ]
