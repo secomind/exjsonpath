@@ -52,4 +52,34 @@ defmodule ExJSONPath.Lexer do
                 {:identifier, 1, "value"}
               ], 1}
   end
+
+  # https://cburgmer.github.io/json-path-comparison/results/dot_notation_with_non_ASCII_key.html
+  test "unicode tokenization" do
+    assert :jsonpath_lexer.string('$.ユニコード') ==
+             {:ok, [{:"$", 1}, {:., 1}, {:identifier, 1, "ユニコード"}], 1}
+  end
+
+  test "mixed unicode and ascii tokenization" do
+    assert :jsonpath_lexer.string('$.ユnikodo') ==
+             {:ok, [{:"$", 1}, {:., 1}, {:identifier, 1, "ユnikodo"}], 1}
+  end
+
+  test "mixed ascii and unicode tokenization" do
+    assert :jsonpath_lexer.string('$.yuニコード') ==
+             {:ok, [{:"$", 1}, {:., 1}, {:identifier, 1, "yuニコード"}], 1}
+  end
+
+  test "latin accents and ascii tokenization" do
+    assert :jsonpath_lexer.string('$.à.è.i') ==
+             {:ok,
+              [
+                {:"$", 1},
+                {:., 1},
+                {:identifier, 1, "à"},
+                {:., 1},
+                {:identifier, 1, "è"},
+                {:., 1},
+                {:identifier, 1, "i"}
+              ], 1}
+  end
 end

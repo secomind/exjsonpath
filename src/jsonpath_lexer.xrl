@@ -19,7 +19,7 @@
 Definitions.
 
 WHITESPACE = [\s\t\n\r]
-IDENTIFIER  = [a-zA-Z_][a-zA-Z0-9_]*
+IDENTIFIER  = [^'".*0-9()$?,>=<\-\:\@\[\]\s\t\n\r][^'".*()$?,>=<\-\:\@\[\]\s\t\n\r]*
 INTEGER = \-?[0-9]+
 STRING = \"[^"]*\"
 LSTRING = \'[^']*\'
@@ -27,7 +27,7 @@ LSTRING = \'[^']*\'
 Rules.
 
 {WHITESPACE}+ : skip_token.
-{IDENTIFIER}  : {token, {identifier,  TokenLine, list_to_binary(TokenChars)}}.
+{IDENTIFIER}  : {token, {identifier,  TokenLine, unicode:characters_to_binary(TokenChars)}}.
 {INTEGER}  : {token, {integer,  TokenLine, list_to_integer(TokenChars)}}.
 {STRING}  : {token, {string,  TokenLine, string_to_binary(TokenChars)}}.
 {LSTRING}  : {token, {string,  TokenLine, string_to_binary(TokenChars)}}.
