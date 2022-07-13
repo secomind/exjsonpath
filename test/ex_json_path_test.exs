@@ -591,6 +591,151 @@ defmodule ExJSONPathTest do
       assert ExJSONPath.eval(map, path) == {:ok, []}
     end
 
+    # https://cburgmer.github.io/json-path-comparison/results/array_slice_with_start_large_negative_number_and_open_end_on_short_array.html
+    test ~s{eval $.data[-4:]} do
+      map = %{"data" => [1, 2, 3]}
+
+      path = ~s{$.data[-4:]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, [1, 2, 3]}
+    end
+
+    test ~s{eval $.data[-3:]} do
+      map = %{"data" => ["a", "b", "c"]}
+
+      path = ~s{$.data[-3:]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["a", "b", "c"]}
+    end
+
+    test ~s{eval $.data[-2:]} do
+      map = %{"data" => ["a", "b", "c"]}
+
+      path = ~s{$.data[-2:]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["b", "c"]}
+    end
+
+    test ~s{eval $.data[-1:]} do
+      map = %{"data" => [1, 2, 3]}
+
+      path = ~s{$.data[-1:]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, [3]}
+    end
+
+    test ~s{eval $.data[3:-4]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[3:-4]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test ~s{eval $.data[-4:-5]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:-5]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test ~s{eval $.data[-4:-4]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:-4]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test ~s{eval $.data[-4:-3]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:-3]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c"]}
+    end
+
+    test ~s{eval $.data[-4:-2]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:-2]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c", "d"]}
+    end
+
+    test ~s{eval $.data[-4:-1]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:-1]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c", "d", "e"]}
+    end
+
+    test ~s{eval $.data[-4:0]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:0]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c", "d", "e", "f"]}
+    end
+
+    test ~s{eval $.data[-4:1]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:1]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test ~s{eval $.data[-4:2]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:2]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, []}
+    end
+
+    test ~s{eval $.data[-4:3]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:3]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c"]}
+    end
+
+    test ~s{eval $.data[-4:4]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:4]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c", "d"]}
+    end
+
+    test ~s{eval $.data[-4:5]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:5]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c", "d", "e"]}
+    end
+
+    test ~s{eval $.data[-4:6]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:6]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c", "d", "e", "f"]}
+    end
+
+    test ~s{eval $.data[-4:7]} do
+      map = %{"data" => ["a", "b", "c", "d", "e", "f"]}
+
+      path = ~s{$.data[-4:7]}
+
+      assert ExJSONPath.eval(map, path) == {:ok, ["c", "d", "e", "f"]}
+    end
+
     test ~s{eval $.data[:5]} do
       map = %{"data" => [0, -1, 2, -3, 4, -5, 6, -7, 8]}
 
